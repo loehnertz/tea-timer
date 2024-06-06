@@ -1,34 +1,10 @@
 body {
     background-color: #f0f0f0;
-    color: #333; /* Set a default font color */
-    margin: 0;
-    font-family: Arial, sans-serif;
+    color: #333;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px 10px; /* Add padding to ensure space on smaller screens */
-}
-
-.container {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.box {
-    width: 100%;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    background: white;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.timer-box {
-    text-align: center;
 }
 
 .buttons {
@@ -40,49 +16,32 @@ body {
 
 .buttons .button {
     flex: 1;
-    min-width: 100px;
-}
-
-.field {
-    margin-top: 20px;
-    width: 100%;
-}
-
-.field .control {
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
-}
-
-.input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-}
-
-.label {
-    display: block;
-    margin-bottom: 5px;
-    text-align: center;
-    font-weight: bold;
 }
 
 .title.is-1 {
-    font-size: 2.5rem; /* Increased font size */
-    color: #333; /* Set title color */
+    font-size: 2.5rem;
+    color: #333;
 }
 
 .title.is-2 {
-    font-size: 2rem; /* Increased font size */
+    font-size: 2rem;
     margin-bottom: 10px;
-    color: #333; /* Set title color */
+    color: #333;
 }
 
-.timer {
-    font-size: 3.5rem; /* Make the timer larger */
+#timer-box {
+    text-align: center;
+}
+
+#offset-buttons > div {
+    display: flex;
+    flex-direction: row;
+}
+
+#timer {
+    font-size: 3.5rem;
     font-weight: bold;
-    color: #333; /* Set timer color */
+    color: #333;
 }
 
 .buttons.are-small .button {
@@ -111,14 +70,14 @@ body {
     }
 
     .title.is-1 {
-        font-size: 2rem; /* Adjust for smaller screens */
+        font-size: 2rem;
     }
 
     .title.is-2 {
-        font-size: 1.75rem; /* Adjust for smaller screens */
+        font-size: 1.75rem;
     }
 
-    .timer {
-        font-size: 3rem; /* Adjust for smaller screens */
+    #timer {
+        font-size: 3rem;
     }
 }

@@ -8,10 +8,10 @@
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-<div class="section is-fullheight" id="app">
+<div class="section" id="app">
     <div class="container">
         <div class="box" v-if="showSettings">
-            <h1 class="title is-1 has-text-centered">🍵 Gong Fu Tea Timer</h1>
+            <h1 class="title is-1 has-text-centered">🍵<br>Gong Fu Tea Timer</h1>
             <div class="field">
                 <label class="label" for="teaType">Select Tea Type:</label>
                 <div class="control">
@@ -62,13 +62,13 @@
             </div>
         </div>
 
-        <div class="box timer-box" v-else>
-            <h1 class="title is-1 has-text-centered">🍵 Gong Fu Tea Timer</h1>
+        <div class="box" id="timer-box" v-else>
+            <h1 class="title is-1 has-text-centered">🍵</h1>
             <div class="content has-text-centered mt-5">
                 <p class="title is-2">Current Infusion: <span class="has-text-weight-bold">{{ infusionCount }}</span>
                 </p>
                 <p class="title is-1">
-                    <span ref="time">{{ timeRemaining.toFixed(2) }}</span>
+                    <span id="timer" ref="time">{{ timeRemaining.toFixed(2) }}</span>
                 </p>
             </div>
             <div class="buttons are-medium is-centered mt-4">
@@ -87,23 +87,27 @@
                            v-model.number="offsetTime">
                 </div>
             </div>
-            <div class="buttons are-small mt-5">
-                <button
-                        :disabled="timerRunning"
-                        :key="'decrease-' + percentage"
-                        @click="adjustOffsetByPercentage(-percentage)"
-                        class="button is-danger"
-                        v-for="percentage in negativePercentageAdjustments">
-                    -{{ percentage }}%
-                </button>
-                <button
-                        :disabled="timerRunning"
-                        :key="'increase-' + percentage"
-                        @click="adjustOffsetByPercentage(percentage)"
-                        class="button is-success"
-                        v-for="percentage in positivePercentageAdjustments">
-                    +{{ percentage }}%
-                </button>
+            <div class="buttons are-small mt-5" id="offset-buttons">
+                <div id="negative-offsets">
+                    <button
+                            :disabled="timerRunning"
+                            :key="'decrease-' + percentage"
+                            @click="adjustOffsetByPercentage(-percentage)"
+                            class="button is-danger"
+                            v-for="percentage in negativePercentageAdjustments">
+                        -{{ percentage }}%
+                    </button>
+                </div>
+                <div id="positive-offsets">
+                    <button
+                            :disabled="timerRunning"
+                            :key="'increase-' + percentage"
+                            @click="adjustOffsetByPercentage(percentage)"
+                            class="button is-success"
+                            v-for="percentage in positivePercentageAdjustments">
+                        +{{ percentage }}%
+                    </button>
+                </div>
             </div>
             <hr>
             <div class="field mt-5">
