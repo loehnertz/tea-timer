@@ -25,6 +25,20 @@ body {
     margin-bottom: 10px;
 }
 
+.buttons.are-small .button {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+    margin: 5px;
+}
+
+.mt-4 {
+    margin-top: 1.5rem;
+}
+
+.mt-5 {
+    margin-top: 2rem;
+}
+
 #timer-box {
     text-align: center;
 }
@@ -39,18 +53,8 @@ body {
     font-weight: bold;
 }
 
-.buttons.are-small .button {
-    font-size: 0.75rem;
-    padding: 0.5rem;
-    margin: 5px;
-}
-
-.mt-4 {
-    margin-top: 1.5rem;
-}
-
-.mt-5 {
-    margin-top: 2rem;
+#confirm-button {
+    margin-top: 2.5rem;
 }
 
 @media (max-width: 768px) {

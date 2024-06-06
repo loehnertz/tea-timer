@@ -55,9 +55,15 @@ new Vue({
         }
     },
     methods: {
+        /**
+         * Updates the document title to display the time remaining.
+         */
         updateDisplay() {
             document.title = `🍵 ${Math.round(this.timeRemaining)} - Gong Fu Tea Timer`;
         },
+        /**
+         * Resets the timer, clearing any intervals and setting timeRemaining to nextInfusionTime.
+         */
         resetTimer() {
             clearInterval(this.timerInterval);
             clearInterval(this.tabTitleInterval);
@@ -65,6 +71,9 @@ new Vue({
             this.timerRunning = false;
             this.updateDisplay();
         },
+        /**
+         * Toggles the timer between start and stop states.
+         */
         toggleStartStop() {
             if (this.timerRunning) {
                 this.resetTimer();
@@ -72,6 +81,9 @@ new Vue({
                 this.startTimer();
             }
         },
+        /**
+         * Starts the timer, decrementing timeRemaining at regular intervals.
+         */
         startTimer() {
             this.timerRunning = true;
 
@@ -101,6 +113,9 @@ new Vue({
                 this.updateDisplay();
             }, 1000);
         },
+        /**
+         * Moves to the previous infusion if possible and resets the timer.
+         */
         previousInfusion() {
             if (this.infusionCount > 1) {
                 this.infusionCount--;
@@ -108,11 +123,17 @@ new Vue({
                 this.resetTimer();
             }
         },
+        /**
+         * Skips to the next infusion and resets the timer.
+         */
         skipInfusion() {
             this.infusionCount++;
             localStorage.setItem('infusionCount', this.infusionCount);
             this.resetTimer();
         },
+        /**
+         * Confirms the current settings and resets the session.
+         */
         confirmSettings() {
             const customSettings = {
                 initialTime: this.initialTime,
@@ -124,6 +145,9 @@ new Vue({
             localStorage.setItem('infusionCount', this.infusionCount);
             this.resetTimer();
         },
+        /**
+         * Returns to settings, discarding the current session.
+         */
         backToSettings() {
             if (confirm('Are you sure you want to discard the current session and return to settings?')) {
                 clearInterval(this.timerInterval);
@@ -134,13 +158,20 @@ new Vue({
                 document.title = "🍵 Gong Fu Tea Timer";
             }
         },
+        /**
+         * Adjusts the offset time by a given percentage.
+         * @param {number} percentage - The percentage to adjust the offset time by.
+         */
         adjustOffsetByPercentage(percentage) {
             if (!this.timerRunning) {
                 this.offsetTime = (this.incrementTime * percentage) / 100;
-                this.timeRemaining = parseFloat((this.nextInfusionTime + this.offsetTime).toFixed(1)); // Update current infusion time
+                this.timeRemaining = parseFloat((this.nextInfusionTime).toFixed(1));
                 this.updateDisplay();
             }
         },
+        /**
+         * Loads the session data from localStorage and initializes the timer.
+         */
         loadSession() {
             const storedInfusionCount = localStorage.getItem('infusionCount');
             const storedSettings = JSON.parse(localStorage.getItem('customSettings'));
