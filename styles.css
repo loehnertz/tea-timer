@@ -1,83 +1,120 @@
 body {
     background-color: #f0f0f0;
     margin: 0;
-}
-
-.section.is-fullheight {
+    font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    padding: 20px 10px; /* Add padding to ensure space on smaller screens */
 }
 
 .container {
-    width: 90%;
+    width: 100%;
     max-width: 600px;
+    margin: 0 auto;
 }
 
 .box {
     width: 100%;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: white;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    padding: 2rem; /* Add padding for better spacing */
 }
 
 .timer-box {
-    height: 80vh;
+    text-align: center;
 }
 
 .buttons {
+    display: flex;
     justify-content: center;
-    display: flex; /* Ensure buttons are centered */
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.buttons .button {
+    flex: 1;
+    min-width: 100px;
 }
 
 .field {
-    margin-top: 1.5rem;
+    margin-top: 20px;
     width: 100%;
-    max-width: 400px;
-    text-align: center;
-}
-
-.field label {
-    text-align: center;
 }
 
 .field .control {
-    display: flex;
-    justify-content: center;
-}
-
-.input {
+    width: 100%;
     max-width: 300px;
     margin: 0 auto;
 }
 
-@media (max-width: 768px) {
-    .timer-box {
-        height: 90vh;
-    }
+.input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
 }
 
-.subtitle.is-5 {
-    margin-bottom: 1rem;
+.label {
+    display: block;
+    margin-bottom: 5px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.title.is-1 {
+    font-size: 2.5rem; /* Increased font size */
+}
+
+.title.is-2 {
+    font-size: 2rem; /* Increased font size */
+    margin-bottom: 10px;
+}
+
+.timer {
+    font-size: 3.5rem; /* Make the timer larger */
+    font-weight: bold;
+}
+
+.buttons.are-small .button {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+    margin: 5px;
+}
+
+.mt-4 {
+    margin-top: 1.5rem;
 }
 
 .mt-5 {
     margin-top: 2rem;
 }
 
-.button.is-large {
-    width: 100%;
-    max-width: 300px;
-}
+@media (max-width: 768px) {
+    .buttons .button {
+        flex: 1 1 calc(50% - 20px);
+        margin: 5px 0;
+    }
 
-.buttons.is-small .button {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-}
+    .buttons.are-small .button {
+        flex: 1 1 calc(33.33% - 10px);
+        margin: 5px;
+    }
 
-.title.is-2 {
-    margin-top: 2rem; /* Add margin top for spacing */
+    .title.is-1 {
+        font-size: 2rem; /* Adjust for smaller screens */
+    }
+
+    .title.is-2 {
+        font-size: 1.75rem; /* Adjust for smaller screens */
+    }
+
+    .timer {
+        font-size: 3rem; /* Adjust for smaller screens */
+    }
 }
