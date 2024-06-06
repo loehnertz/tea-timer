@@ -17,58 +17,57 @@ new Vue({
             {name: 'Oolong (ball)', waterTemp: 99, amount: 6, firstInfusion: 25, additionalInfusions: 5},
             {name: 'Black (small leaf)', waterTemp: 90, amount: 4.5, firstInfusion: 10, additionalInfusions: 5},
             {name: 'Black (large leaf)', waterTemp: 95, amount: 4, firstInfusion: 15, additionalInfusions: 5},
-            {name: 'PuErh (raw)', waterTemp: 95, amount: 5, firstInfusion: 10, additionalInfusions: 3},
-            {name: 'PuErh (ripe)', waterTemp: 99, amount: 5, firstInfusion: 10, additionalInfusions: 5}
+            {name: 'Dark (raw)', waterTemp: 95, amount: 5, firstInfusion: 10, additionalInfusions: 3},
+            {name: 'Dark (ripe)', waterTemp: 99, amount: 5, firstInfusion: 10, additionalInfusions: 5}
         ],
         positivePercentageAdjustments: [10, 25, 50],
         negativePercentageAdjustments: [10, 25, 50].reverse(),
         beepWarning: new Audio('./audio/sonar_low.mp3'),
         beepEnd: new Audio('./audio/sonar_high.mp3'),
         beepWarningPlayed: false,
-        beepEndPlayed: false,
-        worker: null
+        worker: null,
     },
     computed: {
         nextInfusionTime() {
             const baseTime = this.initialTime + this.incrementTime * (this.infusionCount - 1);
             return baseTime + this.offsetTime;
+        },
+        storedSettings() {
+            return JSON.parse(localStorage.getItem('customSettings'));
         }
     },
     watch: {
-        async selectedPreset(newVal) {
-            if (newVal) {
-                this.initialTime = newVal.firstInfusion;
-                this.incrementTime = newVal.additionalInfusions;
-            } else {
-                const storedSettings = JSON.parse(localStorage.getItem('customSettings'));
-                this.initialTime = storedSettings ? storedSettings.initialTime : 20;
-                this.incrementTime = storedSettings ? storedSettings.incrementTime : 5;
+        async selectedPreset(newValue) {
+            if (newValue) {
+                this.initialTime = newValue.firstInfusion;
+                this.incrementTime = newValue.additionalInfusions;
+            } else if (this.storedSettings) {
+                this.initialTime = this.storedSettings.initialTime;
+                this.incrementTime = this.storedSettings.incrementTime;
             }
             await this.resetTimer();
         },
-        offsetTime(newVal) {
+        offsetTime() {
             if (!this.timerRunning) {
-                this.timeRemaining = parseFloat((this.nextInfusionTime).toFixed(1));
+                this.timeRemaining = parseFloat(this.nextInfusionTime.toFixed(1));
                 this.updateDisplay();
             }
-        }
+        },
+        async infusionCount() {
+            await this.resetTimer();
+        },
     },
     methods: {
         /**
-         * Updates the document title to display the time remaining.
+         * Updates the document title to display the remaining time.
          */
         updateDisplay() {
             document.title = `🍵 ${Math.round(this.timeRemaining)} - Gong Fu Tea Timer`;
         },
         /**
-         * Resets the timer, clearing any intervals and setting timeRemaining to nextInfusionTime.
+         * Resets the timer, clearing any intervals and setting `timeRemaining` to `nextInfusionTime`.
          */
         async resetTimer() {
-            if (this.worker) {
-                this.worker.terminate();
-            }
-            this.worker = new Worker('timerWorker.js');
-            this.worker.onmessage = await this.handleWorkerMessage;
             this.worker.postMessage({command: 'reset', payload: {initialTime: this.nextInfusionTime}});
             this.timerRunning = false;
             this.updateDisplay();
@@ -76,24 +75,24 @@ new Vue({
         /**
          * Toggles the timer between start and stop states.
          */
-        toggleStartStop() {
+        async toggleStartStop() {
             if (this.timerRunning) {
-                this.stopTimer();
+                await this.stopTimer();
             } else {
-                this.startTimer();
+                await this.startTimer();
             }
         },
         /**
-         * Starts the timer, decrementing timeRemaining at regular intervals.
+         * Starts the timer, decrementing `timeRemaining` at regular intervals.
          */
-        startTimer() {
+        async startTimer() {
             this.timerRunning = true;
             this.worker.postMessage({command: 'start', payload: {initialTime: this.timeRemaining}});
         },
         /**
          * Stops the timer.
          */
-        stopTimer() {
+        async stopTimer() {
             this.timerRunning = false;
             this.worker.postMessage({command: 'stop'});
         },
@@ -148,23 +147,22 @@ new Vue({
         adjustOffsetByPercentage(percentage) {
             if (!this.timerRunning) {
                 this.offsetTime = (this.incrementTime * percentage) / 100;
-                this.timeRemaining = parseFloat((this.nextInfusionTime).toFixed(1));
+                this.timeRemaining = parseFloat(this.nextInfusionTime.toFixed(1));
                 this.updateDisplay();
             }
         },
         /**
-         * Loads the session data from localStorage and initializes the timer.
+         * Loads the session data from the local storage and initializes the timer.
          */
         async loadSession() {
             const storedInfusionCount = localStorage.getItem('infusionCount');
-            const storedSettings = JSON.parse(localStorage.getItem('customSettings'));
             if (storedInfusionCount !== null) {
                 this.infusionCount = parseInt(storedInfusionCount);
                 this.showSettings = false;
             }
-            if (storedSettings !== null) {
-                this.initialTime = storedSettings.initialTime;
-                this.incrementTime = storedSettings.incrementTime;
+            if (this.storedSettings) {
+                this.initialTime = this.storedSettings.initialTime;
+                this.incrementTime = this.storedSettings.incrementTime;
             }
             await this.resetTimer();
         },
@@ -183,7 +181,7 @@ new Vue({
                 }
             } else if (command === 'end') {
                 await this.beepEnd.play();
-                this.beepEndPlayed = true;
+                this.beepWarningPlayed = false;
                 this.infusionCount++;
                 this.initialTime += this.offsetTime;
                 this.offsetTime = 0;
@@ -191,13 +189,16 @@ new Vue({
                 await this.resetTimer();
             } else if (command === 'reset') {
                 this.timeRemaining = timeRemaining;
+                this.beepWarningPlayed = false;
                 this.updateDisplay();
             }
-        }
+        },
     },
     async mounted() {
+        this.worker = new Worker('./timerWorker.js');
+        this.worker.onmessage = await this.handleWorkerMessage;
+        await this.beepWarning.load();
+        await this.beepEnd.load();
         await this.loadSession();
-        this.beepWarning.load();
-        this.beepEnd.load();
-    }
+    },
 });
