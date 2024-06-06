@@ -1,6 +1,4 @@
 body {
-    background-color: #f0f0f0;
-    color: #333;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -20,13 +18,11 @@ body {
 
 .title.is-1 {
     font-size: 2.5rem;
-    color: #333;
 }
 
 .title.is-2 {
     font-size: 2rem;
     margin-bottom: 10px;
-    color: #333;
 }
 
 #timer-box {
@@ -41,7 +37,6 @@ body {
 #timer {
     font-size: 3.5rem;
     font-weight: bold;
-    color: #333;
 }
 
 .buttons.are-small .button {
