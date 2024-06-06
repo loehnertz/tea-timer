@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>🍵 Gong Fu Tea Timer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="section is-fullheight" id="app">
+    <div class="container">
+        <div class="box" v-if="showSettings">
+            <h1 class="title is-1 has-text-centered">🍵 Gong Fu Tea Timer</h1>
+            <div class="field">
+                <label class="label" for="teaType">Select Tea Type:</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select id="teaType" v-model="selectedPreset">
+                            <option value="">Custom</option>
+                            <option :value="preset" v-for="preset in presets">{{ preset.name }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div v-if="selectedPreset">
+                <div class="field">
+                    <label class="label">Water Temperature: {{ selectedPreset.waterTemp }} °C</label>
+                </div>
+                <div class="field">
+                    <label class="label">Amount: {{ selectedPreset.amount }} g / 100 ml</label>
+                </div>
+                <div class="field">
+                    <label class="label">1st Infusion Time: {{ selectedPreset.firstInfusion }} seconds</label>
+                </div>
+                <div class="field">
+                    <label class="label">Additional Infusion Time: {{ selectedPreset.additionalInfusions }}
+                        seconds</label>
+                </div>
+            </div>
+            <div v-else>
+                <div class="field">
+                    <label class="label" for="initialTime">Initial Infusion Time (seconds):</label>
+                    <div class="control">
+                        <input class="input" id="initialTime" min="1" type="number" v-model.number="initialTime">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label" for="incrementTime">Time Increment per Infusion (seconds):</label>
+                    <div class="control">
+                        <input class="input" id="incrementTime" min="1" type="number" v-model.number="incrementTime">
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button @click="confirmSettings" class="button is-primary is-fullwidth">Confirm</button>
+                </div>
+            </div>
+            <div class="has-text-centered mt-4">
+                <p>By <a href="http://jakob.codes/" target="_blank">Jakob Löhnertz</a></p>
+            </div>
+        </div>
+
+        <div class="box timer-box" v-else>
+            <h1 class="title is-1 has-text-centered">🍵 Gong Fu Tea Timer</h1>
+            <div class="content has-text-centered mt-5">
+                <p class="title is-2">Current Infusion: <span class="has-text-weight-bold">{{ infusionCount }}</span>
+                </p>
+                <p class="title is-1">
+                    <span ref="time">{{ timeRemaining.toFixed(2) }}</span>
+                </p>
+            </div>
+            <div class="buttons are-medium is-centered mt-4">
+                <button :class="timerRunning ? 'is-danger' : 'is-success'" @click="toggleStartStop"
+                        class="button is-large">{{ timerRunning ? 'Stop' : 'Start' }}
+                </button>
+            </div>
+            <div class="buttons are-medium mt-4">
+                <button @click="previousInfusion" class="button is-info">Previous</button>
+                <button @click="skipInfusion" class="button is-warning">Skip</button>
+            </div>
+            <div class="field mt-5">
+                <label class="label" for="offsetTime">Adjust Current Infusion Time (seconds):</label>
+                <div class="control">
+                    <input :disabled="timerRunning" class="input" id="offsetTime" type="number"
+                           v-model.number="offsetTime">
+                </div>
+            </div>
+            <div class="buttons are-small mt-5">
+                <button
+                        :disabled="timerRunning"
+                        :key="'decrease-' + percentage"
+                        @click="adjustOffsetByPercentage(-percentage)"
+                        class="button is-danger"
+                        v-for="percentage in negativePercentageAdjustments">
+                    -{{ percentage }}%
+                </button>
+                <button
+                        :disabled="timerRunning"
+                        :key="'increase-' + percentage"
+                        @click="adjustOffsetByPercentage(percentage)"
+                        class="button is-success"
+                        v-for="percentage in positivePercentageAdjustments">
+                    +{{ percentage }}%
+                </button>
+            </div>
+            <hr>
+            <div class="field mt-5">
+                <button @click="backToSettings" class="button is-danger is-fullwidth">Back to Settings</button>
+            </div>
+            <div class="has-text-centered mt-4">
+                <p>By <a href="http://jakob.codes/" target="_blank">Jakob Löhnertz</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+body {
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+.section.is-fullheight {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 600px;
+}
+
+.box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem; /* Add padding for better spacing */
+}
+
+.timer-box {
+    height: 80vh;
+}
+
+.buttons {
+    justify-content: center;
+    display: flex; /* Ensure buttons are centered */
+}
+
+.field {
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.field label {
+    text-align: center;
+}
+
+.field .control {
+    display: flex;
+    justify-content: center;
+}
+
+.input {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .timer-box {
+        height: 90vh;
+    }
+}
+
+.subtitle.is-5 {
+    margin-bottom: 1rem;
+}
+
+.mt-5 {
+    margin-top: 2rem;
+}
+
+.button.is-large {
+    width: 100%;
+    max-width: 300px;
+}
+
+.buttons.is-small .button {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.title.is-2 {
+    margin-top: 2rem; /* Add margin top for spacing */
+}
