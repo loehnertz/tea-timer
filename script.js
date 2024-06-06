@@ -6,11 +6,9 @@ new Vue({
         offsetTime: 0,
         infusionCount: 1,
         timeRemaining: 0,
-        timerInterval: null,
-        tabTitleInterval: null,
-        showSettings: true,
         timerRunning: false,
         selectedPreset: "",
+        showSettings: true,
         presets: [
             {name: 'White', waterTemp: 85, amount: 3.5, firstInfusion: 20, additionalInfusions: 10},
             {name: 'Green', waterTemp: 80, amount: 3, firstInfusion: 15, additionalInfusions: 3},
@@ -28,6 +26,7 @@ new Vue({
         beepEnd: new Audio('./audio/sonar_high.mp3'),
         beepWarningPlayed: false,
         beepEndPlayed: false,
+        worker: null
     },
     computed: {
         nextInfusionTime() {
@@ -36,7 +35,7 @@ new Vue({
         }
     },
     watch: {
-        selectedPreset(newVal) {
+        async selectedPreset(newVal) {
             if (newVal) {
                 this.initialTime = newVal.firstInfusion;
                 this.incrementTime = newVal.additionalInfusions;
@@ -45,7 +44,7 @@ new Vue({
                 this.initialTime = storedSettings ? storedSettings.initialTime : 20;
                 this.incrementTime = storedSettings ? storedSettings.incrementTime : 5;
             }
-            this.resetTimer();
+            await this.resetTimer();
         },
         offsetTime(newVal) {
             if (!this.timerRunning) {
@@ -64,10 +63,13 @@ new Vue({
         /**
          * Resets the timer, clearing any intervals and setting timeRemaining to nextInfusionTime.
          */
-        resetTimer() {
-            clearInterval(this.timerInterval);
-            clearInterval(this.tabTitleInterval);
-            this.timeRemaining = this.nextInfusionTime;
+        async resetTimer() {
+            if (this.worker) {
+                this.worker.terminate();
+            }
+            this.worker = new Worker('timerWorker.js');
+            this.worker.onmessage = await this.handleWorkerMessage;
+            this.worker.postMessage({command: 'reset', payload: {initialTime: this.nextInfusionTime}});
             this.timerRunning = false;
             this.updateDisplay();
         },
@@ -76,7 +78,7 @@ new Vue({
          */
         toggleStartStop() {
             if (this.timerRunning) {
-                this.resetTimer();
+                this.stopTimer();
             } else {
                 this.startTimer();
             }
@@ -86,55 +88,37 @@ new Vue({
          */
         startTimer() {
             this.timerRunning = true;
-
-            this.timerInterval = setInterval(() => {
-                this.timeRemaining = parseFloat((this.timeRemaining - 0.1).toFixed(1));
-                if (this.timeRemaining <= 0) {
-                    if (!this.beepEndPlayed) {
-                        this.beepEnd.play();
-                        this.beepEndPlayed = true;
-                    }
-                    clearInterval(this.timerInterval);
-                    clearInterval(this.tabTitleInterval);
-                    this.timeRemaining = 0;
-                    this.infusionCount++;
-                    this.initialTime += this.offsetTime;
-                    this.offsetTime = 0;
-                    localStorage.setItem('infusionCount', this.infusionCount);
-                    this.resetTimer();
-                } else if (this.timeRemaining <= 4 && !this.beepWarningPlayed) {
-                    this.beepWarning.play();
-                    this.beepWarningPlayed = true;
-                }
-                this.$forceUpdate();
-            }, 100);
-
-            this.tabTitleInterval = setInterval(() => {
-                this.updateDisplay();
-            }, 1000);
+            this.worker.postMessage({command: 'start', payload: {initialTime: this.timeRemaining}});
+        },
+        /**
+         * Stops the timer.
+         */
+        stopTimer() {
+            this.timerRunning = false;
+            this.worker.postMessage({command: 'stop'});
         },
         /**
          * Moves to the previous infusion if possible and resets the timer.
          */
-        previousInfusion() {
+        async previousInfusion() {
             if (this.infusionCount > 1) {
                 this.infusionCount--;
                 localStorage.setItem('infusionCount', this.infusionCount);
-                this.resetTimer();
+                await this.resetTimer();
             }
         },
         /**
          * Skips to the next infusion and resets the timer.
          */
-        skipInfusion() {
+        async skipInfusion() {
             this.infusionCount++;
             localStorage.setItem('infusionCount', this.infusionCount);
-            this.resetTimer();
+            await this.resetTimer();
         },
         /**
          * Confirms the current settings and resets the session.
          */
-        confirmSettings() {
+        async confirmSettings() {
             const customSettings = {
                 initialTime: this.initialTime,
                 incrementTime: this.incrementTime
@@ -143,15 +127,14 @@ new Vue({
             this.showSettings = false;
             this.infusionCount = 1;
             localStorage.setItem('infusionCount', this.infusionCount);
-            this.resetTimer();
+            await this.resetTimer();
         },
         /**
          * Returns to settings, discarding the current session.
          */
         backToSettings() {
             if (confirm('Are you sure you want to discard the current session and return to settings?')) {
-                clearInterval(this.timerInterval);
-                clearInterval(this.tabTitleInterval);
+                if (this.worker) this.worker.terminate();
                 this.offsetTime = 0;
                 localStorage.removeItem('infusionCount');
                 this.showSettings = true;
@@ -172,7 +155,7 @@ new Vue({
         /**
          * Loads the session data from localStorage and initializes the timer.
          */
-        loadSession() {
+        async loadSession() {
             const storedInfusionCount = localStorage.getItem('infusionCount');
             const storedSettings = JSON.parse(localStorage.getItem('customSettings'));
             if (storedInfusionCount !== null) {
@@ -183,11 +166,37 @@ new Vue({
                 this.initialTime = storedSettings.initialTime;
                 this.incrementTime = storedSettings.incrementTime;
             }
-            this.resetTimer();
+            await this.resetTimer();
+        },
+        /**
+         * Handles messages received from the Web Worker.
+         * @param {MessageEvent} e - The message event from the Web Worker.
+         */
+        async handleWorkerMessage(e) {
+            const {command, timeRemaining} = e.data;
+            if (command === 'tick') {
+                this.timeRemaining = timeRemaining;
+                this.updateDisplay();
+                if (this.timeRemaining <= 4 && !this.beepWarningPlayed) {
+                    await this.beepWarning.play();
+                    this.beepWarningPlayed = true;
+                }
+            } else if (command === 'end') {
+                await this.beepEnd.play();
+                this.beepEndPlayed = true;
+                this.infusionCount++;
+                this.initialTime += this.offsetTime;
+                this.offsetTime = 0;
+                localStorage.setItem('infusionCount', this.infusionCount);
+                await this.resetTimer();
+            } else if (command === 'reset') {
+                this.timeRemaining = timeRemaining;
+                this.updateDisplay();
+            }
         }
     },
-    mounted() {
-        this.loadSession();
+    async mounted() {
+        await this.loadSession();
         this.beepWarning.load();
         this.beepEnd.load();
     }
