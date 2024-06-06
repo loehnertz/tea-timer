@@ -1,5 +1,6 @@
 body {
     background-color: #f0f0f0;
+    color: #333; /* Set a default font color */
     margin: 0;
     font-family: Arial, sans-serif;
     display: flex;
@@ -69,16 +70,19 @@ body {
 
 .title.is-1 {
     font-size: 2.5rem; /* Increased font size */
+    color: #333; /* Set title color */
 }
 
 .title.is-2 {
     font-size: 2rem; /* Increased font size */
     margin-bottom: 10px;
+    color: #333; /* Set title color */
 }
 
 .timer {
     font-size: 3.5rem; /* Make the timer larger */
     font-weight: bold;
+    color: #333; /* Set timer color */
 }
 
 .buttons.are-small .button {
