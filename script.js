@@ -4,7 +4,7 @@ new Vue({
         initialTime: 20, // Default initial time
         incrementTime: 5, // Default increment time
         offsetTime: 0,
-        infusionCount: 1, // Start indexing from 1
+        infusionCount: 1,
         timeRemaining: 0,
         timerInterval: null,
         tabTitleInterval: null,
@@ -23,14 +23,16 @@ new Vue({
             {name: 'PuErh (ripe)', waterTemp: 99, amount: 5, firstInfusion: 10, additionalInfusions: 5}
         ],
         positivePercentageAdjustments: [10, 25, 50],
-        negativePercentageAdjustments: [10, 25, 50].reverse(), // Reverse the order
+        negativePercentageAdjustments: [10, 25, 50].reverse(),
         beepWarning: new Audio('./audio/sonar_low.mp3'),
-        beepEnd: new Audio('./audio/sonar_high.mp3')
+        beepEnd: new Audio('./audio/sonar_high.mp3'),
+        beepWarningPlayed: false,
+        beepEndPlayed: false,
     },
     computed: {
         nextInfusionTime() {
             const baseTime = this.initialTime + this.incrementTime * (this.infusionCount - 1);
-            return baseTime;
+            return baseTime + this.offsetTime;
         }
     },
     watch: {
@@ -47,7 +49,7 @@ new Vue({
         },
         offsetTime(newVal) {
             if (!this.timerRunning) {
-                this.timeRemaining = parseFloat((this.nextInfusionTime + newVal).toFixed(2)); // Update current infusion time
+                this.timeRemaining = parseFloat((this.nextInfusionTime).toFixed(1));
                 this.updateDisplay();
             }
         }
@@ -59,7 +61,7 @@ new Vue({
         resetTimer() {
             clearInterval(this.timerInterval);
             clearInterval(this.tabTitleInterval);
-            this.timeRemaining = this.nextInfusionTime + this.offsetTime; // Reset to current infusion time with offset
+            this.timeRemaining = this.nextInfusionTime;
             this.timerRunning = false;
             this.updateDisplay();
         },
@@ -72,22 +74,29 @@ new Vue({
         },
         startTimer() {
             this.timerRunning = true;
+
             this.timerInterval = setInterval(() => {
-                this.timeRemaining = parseFloat((this.timeRemaining - 0.01).toFixed(2));
+                this.timeRemaining = parseFloat((this.timeRemaining - 0.1).toFixed(1));
                 if (this.timeRemaining <= 0) {
+                    if (!this.beepEndPlayed) {
+                        this.beepEnd.play();
+                        this.beepEndPlayed = true;
+                    }
                     clearInterval(this.timerInterval);
                     clearInterval(this.tabTitleInterval);
                     this.timeRemaining = 0;
-                    this.beepEnd.play();
                     this.infusionCount++;
-                    this.offsetTime = 0; // Reset the offset for the next infusion
+                    this.initialTime += this.offsetTime;
+                    this.offsetTime = 0;
                     localStorage.setItem('infusionCount', this.infusionCount);
                     this.resetTimer();
-                } else if (this.timeRemaining <= 4 && this.timeRemaining > 3.99) {
+                } else if (this.timeRemaining <= 4 && !this.beepWarningPlayed) {
                     this.beepWarning.play();
+                    this.beepWarningPlayed = true;
                 }
                 this.$forceUpdate();
-            }, 10);
+            }, 100);
+
             this.tabTitleInterval = setInterval(() => {
                 this.updateDisplay();
             }, 1000);
@@ -119,7 +128,7 @@ new Vue({
             if (confirm('Are you sure you want to discard the current session and return to settings?')) {
                 clearInterval(this.timerInterval);
                 clearInterval(this.tabTitleInterval);
-                this.offsetTime = 0; // Reset the offset
+                this.offsetTime = 0;
                 localStorage.removeItem('infusionCount');
                 this.showSettings = true;
                 document.title = "🍵 Gong Fu Tea Timer";
@@ -127,9 +136,8 @@ new Vue({
         },
         adjustOffsetByPercentage(percentage) {
             if (!this.timerRunning) {
-                const adjustment = (this.incrementTime * percentage) / 100;
-                this.offsetTime = adjustment; // Set to the selected adjustment
-                this.timeRemaining = parseFloat((this.nextInfusionTime + this.offsetTime).toFixed(2)); // Update current infusion time
+                this.offsetTime = (this.incrementTime * percentage) / 100;
+                this.timeRemaining = parseFloat((this.nextInfusionTime + this.offsetTime).toFixed(1)); // Update current infusion time
                 this.updateDisplay();
             }
         },
@@ -149,5 +157,7 @@ new Vue({
     },
     mounted() {
         this.loadSession();
+        this.beepWarning.load();
+        this.beepEnd.load();
     }
 });
