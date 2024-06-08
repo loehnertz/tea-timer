@@ -25,17 +25,28 @@
             </div>
             <div v-if="selectedPreset">
                 <div class="field">
-                    <label class="label">Water Temperature: {{ selectedPreset.waterTemp }} °C</label>
+                    <label class="label">
+                        Water Temperature: {{ selectedPreset.waterTemp }} °C
+                    </label>
                 </div>
                 <div class="field">
-                    <label class="label">Amount: {{ selectedPreset.amount }} g / 100 ml</label>
+                    <label class="label">
+                        Amount: {{ selectedPreset.amount }} g / 100 ml
+                    </label>
                 </div>
                 <div class="field">
-                    <label class="label">1st Infusion Time: {{ selectedPreset.firstInfusion }} seconds</label>
+                    <label class="label">
+                        <span class="has-text-weight-bold">
+                            1st Infusion Time: {{ selectedPreset.firstInfusion }} seconds
+                        </span>
+                    </label>
                 </div>
                 <div class="field">
-                    <label class="label">Additional Infusion Time: {{ selectedPreset.additionalInfusions }}
-                        seconds</label>
+                    <label class="label">
+                        <span class="has-text-weight-bold">
+                            Additional Infusion Time: {{ selectedPreset.additionalInfusions }} seconds
+                        </span>
+                    </label>
                 </div>
             </div>
             <div v-else>
@@ -78,7 +89,7 @@
             </div>
             <div class="buttons are-medium mt-4">
                 <button @click="previousInfusion" class="button is-info">Previous</button>
-                <button @click="skipInfusion" class="button is-warning">Skip</button>
+                <button @click="nextInfusion" class="button is-warning">Skip</button>
             </div>
             <div class="field mt-5">
                 <label class="label" for="offsetTime">Adjust Current Infusion Time (seconds):</label>
@@ -119,8 +130,6 @@
         </div>
     </div>
 </div>
-<audio id="beepWarning" preload="auto" src="./audio/sonar_low.mp3"></audio>
-<audio id="beepEnd" preload="auto" src="./audio/sonar_high.mp3"></audio>
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 <script src="script.js"></script>
 </body>

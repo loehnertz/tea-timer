@@ -1,8 +1,12 @@
 let timerInterval;
 let timeRemaining;
 
-self.onmessage = function (e) {
-    const {command, payload} = e.data;
+/**
+ * Reacts to messages to the Web Worker and starts, stops, or resets the timer.
+ * @param {Object} event - The message event.
+ */
+self.onmessage = function (event) {
+    const {command, payload} = event.data;
 
     switch (command) {
         case 'start':
@@ -17,13 +21,17 @@ self.onmessage = function (e) {
     }
 };
 
+/**
+ * Starts the timer with the given initial time.
+ * @param initialTime - The initial time to start the timer with.
+ */
 function startTimer({initialTime}) {
     timeRemaining = initialTime;
     timerInterval = setInterval(() => {
         timeRemaining = parseFloat((timeRemaining - 0.1).toFixed(1));
         if (timeRemaining <= 0) {
-            clearInterval(timerInterval);
             timeRemaining = 0;
+            clearInterval(timerInterval);
             self.postMessage({command: 'end', timeRemaining});
         } else {
             self.postMessage({command: 'tick', timeRemaining});
@@ -31,10 +39,17 @@ function startTimer({initialTime}) {
     }, 100);
 }
 
+/**
+ * Stops the timer by pausing it.
+ */
 function stopTimer() {
     clearInterval(timerInterval);
 }
 
+/**
+ * Resets the timer to the given initial time.
+ * @param initialTime - The initial time to reset the timer to.
+ */
 function resetTimer({initialTime}) {
     clearInterval(timerInterval);
     timeRemaining = initialTime;

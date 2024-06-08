@@ -5,15 +5,14 @@ body {
     min-height: 100vh;
 }
 
-.buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
 .buttons .button {
     flex: 1;
+}
+
+.buttons.are-small .button {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+    margin: 5px;
 }
 
 .title.is-1 {
@@ -23,20 +22,6 @@ body {
 .title.is-2 {
     font-size: 2rem;
     margin-bottom: 10px;
-}
-
-.buttons.are-small .button {
-    font-size: 0.75rem;
-    padding: 0.5rem;
-    margin: 5px;
-}
-
-.mt-4 {
-    margin-top: 1.5rem;
-}
-
-.mt-5 {
-    margin-top: 2rem;
 }
 
 #timer-box {
@@ -58,6 +43,10 @@ body {
 }
 
 @media (max-width: 768px) {
+    .buttons {
+        justify-content: center;
+    }
+
     .buttons .button {
         flex: 1 1 calc(50% - 20px);
         margin: 5px 0;

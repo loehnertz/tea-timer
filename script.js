@@ -1,14 +1,20 @@
 new Vue({
     el: '#app',
     data: {
+        infusionCount: 1,
         initialTime: 20, // Default initial time
         incrementTime: 5, // Default increment time
         offsetTime: 0,
-        infusionCount: 1,
         timeRemaining: 0,
         timerRunning: false,
         selectedPreset: "",
         showSettings: true,
+        beepWarningPlayed: false,
+        timerWorker: null,
+        beepEnd: new Audio('./audio/sonar_high.mp3'),
+        beepWarning: new Audio('./audio/sonar_low.mp3'),
+        positivePercentageAdjustments: [10, 25, 50],
+        negativePercentageAdjustments: [10, 25, 50].reverse(),  // Reverse the array to display the buttons in the correct order
         presets: [
             {name: 'White', waterTemp: 85, amount: 3.5, firstInfusion: 20, additionalInfusions: 10},
             {name: 'Green', waterTemp: 80, amount: 3, firstInfusion: 15, additionalInfusions: 3},
@@ -20,23 +26,26 @@ new Vue({
             {name: 'Dark (raw)', waterTemp: 95, amount: 5, firstInfusion: 10, additionalInfusions: 3},
             {name: 'Dark (ripe)', waterTemp: 99, amount: 5, firstInfusion: 10, additionalInfusions: 5}
         ],
-        positivePercentageAdjustments: [10, 25, 50],
-        negativePercentageAdjustments: [10, 25, 50].reverse(),
-        beepWarning: new Audio('./audio/sonar_low.mp3'),
-        beepEnd: new Audio('./audio/sonar_high.mp3'),
-        beepWarningPlayed: false,
-        worker: null,
     },
     computed: {
-        nextInfusionTime() {
+        /**
+         * Calculates the infusion time based on the initial time, increment time, and offset time.
+         */
+        infusionTime() {
             const baseTime = this.initialTime + this.incrementTime * (this.infusionCount - 1);
             return baseTime + this.offsetTime;
         },
+        /**
+         * Returns the settings stored in local storage.
+         */
         storedSettings() {
-            return JSON.parse(localStorage.getItem('customSettings'));
+            return JSON.parse(localStorage.getItem('settings'));
         }
     },
     watch: {
+        /**
+         * Watches for changes to the selected preset and updates the initial and increment times accordingly.
+         */
         async selectedPreset(newValue) {
             if (newValue) {
                 this.initialTime = newValue.firstInfusion;
@@ -47,54 +56,65 @@ new Vue({
             }
             await this.resetTimer();
         },
-        offsetTime() {
-            if (!this.timerRunning) {
-                this.timeRemaining = parseFloat(this.nextInfusionTime.toFixed(1));
-                this.updateDisplay();
-            }
+        /**
+         * Watches for changes to the infusion count and persists the new value to local storage.
+         */
+        infusionCount(newValue) {
+            const storedSettings = this.storedSettings;
+            storedSettings.infusionCount = newValue;
+            this.persistSettings(storedSettings);
         },
-        async infusionCount() {
-            await this.resetTimer();
+        /**
+         * Watches for changes to the initial time and persists the new value to local storage.
+         */
+        initialTime(newValue) {
+            const storedSettings = this.storedSettings;
+            storedSettings.initialTime = newValue;
+            this.persistSettings(storedSettings);
+        },
+        /**
+         * Watches for changes to the increment time and persists the new value to local storage.
+         */
+        incrementTime(newValue) {
+            const storedSettings = this.storedSettings;
+            storedSettings.incrementTime = newValue;
+            this.persistSettings(storedSettings);
         },
     },
     methods: {
         /**
          * Updates the document title to display the remaining time.
          */
-        updateDisplay() {
+        updateWindowTitle() {
             document.title = `🍵 ${Math.round(this.timeRemaining)} - Gong Fu Tea Timer`;
-        },
-        /**
-         * Resets the timer, clearing any intervals and setting `timeRemaining` to `nextInfusionTime`.
-         */
-        async resetTimer() {
-            this.worker.postMessage({command: 'reset', payload: {initialTime: this.nextInfusionTime}});
-            this.timerRunning = false;
-            this.updateDisplay();
         },
         /**
          * Toggles the timer between start and stop states.
          */
         async toggleStartStop() {
-            if (this.timerRunning) {
-                await this.stopTimer();
-            } else {
+            if (!this.timerRunning) {
                 await this.startTimer();
+            } else {
+                await this.resetTimer();
             }
         },
         /**
-         * Starts the timer, decrementing `timeRemaining` at regular intervals.
+         * Starts the timer with the current `timeRemaining`.
          */
         async startTimer() {
-            this.timerRunning = true;
-            this.worker.postMessage({command: 'start', payload: {initialTime: this.timeRemaining}});
+            this.timerWorker.postMessage({command: 'start', payload: {initialTime: this.timeRemaining}});
         },
         /**
-         * Stops the timer.
+         * Stops the timer without resetting the `timeRemaining`.
          */
         async stopTimer() {
-            this.timerRunning = false;
-            this.worker.postMessage({command: 'stop'});
+            this.timerWorker.postMessage({command: 'stop', payload: {initialTime: this.timeRemaining}});
+        },
+        /**
+         * Resets the timer to the current `infusionTime`.
+         */
+        async resetTimer() {
+            this.timerWorker.postMessage({command: 'reset', payload: {initialTime: this.infusionTime}});
         },
         /**
          * Moves to the previous infusion if possible and resets the timer.
@@ -102,43 +122,15 @@ new Vue({
         async previousInfusion() {
             if (this.infusionCount > 1) {
                 this.infusionCount--;
-                localStorage.setItem('infusionCount', this.infusionCount);
                 await this.resetTimer();
             }
         },
         /**
          * Skips to the next infusion and resets the timer.
          */
-        async skipInfusion() {
+        async nextInfusion() {
             this.infusionCount++;
-            localStorage.setItem('infusionCount', this.infusionCount);
             await this.resetTimer();
-        },
-        /**
-         * Confirms the current settings and resets the session.
-         */
-        async confirmSettings() {
-            const customSettings = {
-                initialTime: this.initialTime,
-                incrementTime: this.incrementTime
-            };
-            localStorage.setItem('customSettings', JSON.stringify(customSettings));
-            this.showSettings = false;
-            this.infusionCount = 1;
-            localStorage.setItem('infusionCount', this.infusionCount);
-            await this.resetTimer();
-        },
-        /**
-         * Returns to settings, discarding the current session.
-         */
-        backToSettings() {
-            if (confirm('Are you sure you want to discard the current session and return to settings?')) {
-                if (this.worker) this.worker.terminate();
-                this.offsetTime = 0;
-                localStorage.removeItem('infusionCount');
-                this.showSettings = true;
-                document.title = "🍵 Gong Fu Tea Timer";
-            }
         },
         /**
          * Adjusts the offset time by a given percentage.
@@ -147,58 +139,114 @@ new Vue({
         adjustOffsetByPercentage(percentage) {
             if (!this.timerRunning) {
                 this.offsetTime = (this.incrementTime * percentage) / 100;
-                this.timeRemaining = parseFloat(this.nextInfusionTime.toFixed(1));
-                this.updateDisplay();
+                this.timeRemaining = parseFloat(this.infusionTime.toFixed(1));
+                this.updateWindowTitle();
+            }
+        },
+        /**
+         * Confirms the current settings and initializes the session.
+         */
+        async confirmSettings() {
+            this.showSettings = false;
+
+            this.infusionCount = 1;
+            this.offsetTime = 0;
+
+            const settings = {
+                infusionCount: this.infusionCount,
+                initialTime: this.initialTime,
+                incrementTime: this.incrementTime,
+            };
+            this.persistSettings(settings);
+
+            await this.resetTimer();
+        },
+        /**
+         * Returns to settings, discarding the current session from local storage.
+         */
+        backToSettings() {
+            if (confirm('Are you sure you want to discard the current session and return to settings?')) {
+                this.showSettings = true;
+
+                localStorage.removeItem('settings');
+
+                document.title = "🍵 Gong Fu Tea Timer";
             }
         },
         /**
          * Loads the session data from the local storage and initializes the timer.
          */
         async loadSession() {
-            const storedInfusionCount = localStorage.getItem('infusionCount');
-            if (storedInfusionCount !== null) {
-                this.infusionCount = parseInt(storedInfusionCount);
-                this.showSettings = false;
-            }
             if (this.storedSettings) {
+                this.showSettings = false;
+                this.infusionCount = this.storedSettings.infusionCount;
                 this.initialTime = this.storedSettings.initialTime;
                 this.incrementTime = this.storedSettings.incrementTime;
             }
             await this.resetTimer();
         },
         /**
-         * Handles messages received from the Web Worker.
-         * @param {MessageEvent} e - The message event from the Web Worker.
+         * Persists the settings to local storage.
+         * @param {object} storedSettings - The settings to persist.
          */
-        async handleWorkerMessage(e) {
-            const {command, timeRemaining} = e.data;
-            if (command === 'tick') {
-                this.timeRemaining = timeRemaining;
-                this.updateDisplay();
-                if (this.timeRemaining <= 4 && !this.beepWarningPlayed) {
-                    await this.beepWarning.play();
-                    this.beepWarningPlayed = true;
-                }
-            } else if (command === 'end') {
-                await this.beepEnd.play();
-                this.beepWarningPlayed = false;
-                this.infusionCount++;
-                this.initialTime += this.offsetTime;
-                this.offsetTime = 0;
-                localStorage.setItem('infusionCount', this.infusionCount);
-                await this.resetTimer();
-            } else if (command === 'reset') {
-                this.timeRemaining = timeRemaining;
-                this.beepWarningPlayed = false;
-                this.updateDisplay();
+        persistSettings(storedSettings) {
+            localStorage.setItem('settings', JSON.stringify(storedSettings));
+        },
+        /**
+         * Handles messages received from the Web Worker running the timer.
+         * Steps to handle the message:
+         * 1. Update the timerRunning and timeRemaining properties.
+         * 2. Update the window title to display the remaining time.
+         * 3. Play the warning beep if the timer is almost up OR play the end beep if the timer ended.
+         * 4. Move to the next infusion if the timer ended.
+         *
+         * @param {MessageEvent} event - The message event from the Web Worker.
+         */
+        async handleWorkerMessage(event) {
+            const {command, timeRemaining} = event.data;
+
+            switch (command) {
+                case 'tick':
+                    this.timerRunning = true;
+                    this.timeRemaining = timeRemaining;
+
+                    this.updateWindowTitle();
+
+                    if (this.timeRemaining <= 5 && !this.beepWarningPlayed) {
+                        this.beepWarningPlayed = true;
+                        await this.beepWarning.play();
+                    }
+
+                    break;
+                case 'end':
+                    this.initialTime += this.offsetTime;
+                    this.offsetTime = 0;
+
+                    await this.beepEnd.play();
+
+                    // This also resets the timer via a web worker event
+                    await this.nextInfusion();
+
+                    break;
+                case 'reset':
+                    this.timerRunning = false;
+                    this.timeRemaining = timeRemaining;
+
+                    this.updateWindowTitle();
+
+                    this.beepWarningPlayed = false;
+
+                    break;
             }
         },
     },
     async mounted() {
-        this.worker = new Worker('./timerWorker.js');
-        this.worker.onmessage = await this.handleWorkerMessage;
+        this.timerWorker = new Worker('./timerWorker.js');
+        this.timerWorker.onmessage = await this.handleWorkerMessage;
+
         await this.beepWarning.load();
         await this.beepEnd.load();
+
         await this.loadSession();
     },
 });
