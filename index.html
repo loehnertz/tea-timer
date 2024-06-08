@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>🍵 Gong Fu Tea Timer</title>
+    <title>Gong Fu Tea Timer</title>
+    <link href="./image/icon/apple-touch-icon.png" rel="apple-touch-icon" sizes="152x152">
+    <link href="./image/icon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+    <link href="./image/icon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+    <link href="site.webmanifest" rel="manifest">
+    <link color="#5bbad5" href="./image/icon/safari-pinned-tab.svg" rel="mask-icon">
+    <link href="./image/icon/favicon.ico" rel="shortcut icon">
+    <meta content="#da532c" name="msapplication-TileColor">
+    <meta content="./image/icon/browserconfig.xml" name="msapplication-config">
+    <meta content="#ffffff" name="theme-color">
     <link href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css" rel="stylesheet">
     <link href="./style/styles.css" rel="stylesheet">
 </head>
@@ -132,5 +141,15 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 <script src="./script/app.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(function (registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            }).catch(function (error) {
+            console.log('Service Worker registration failed:', error);
+        });
+    }
+</script>
 </body>
 </html>

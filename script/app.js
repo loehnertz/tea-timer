@@ -86,7 +86,7 @@ new Vue({
          * Updates the document title to display the remaining time.
          */
         updateWindowTitle() {
-            document.title = `🍵 ${Math.round(this.timeRemaining)} - Gong Fu Tea Timer`;
+            document.title = `${Math.round(this.timeRemaining)} - Gong Fu Tea Timer`;
         },
         /**
          * Toggles the timer between start and stop states.
@@ -170,7 +170,7 @@ new Vue({
 
                 localStorage.removeItem('settings');
 
-                document.title = "🍵 Gong Fu Tea Timer";
+                document.title = "Gong Fu Tea Timer";
             }
         },
         /**

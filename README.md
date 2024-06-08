@@ -15,7 +15,7 @@ settings, and keep track of the current infusion count.
 
 ## Screenshot
 
-![Gong Fu Tea Timer](./image/screenshot.jpeg)
+![Gong Fu Tea Timer](./image/screenshot/cropped.jpeg)
 
 ## Getting Started
 
