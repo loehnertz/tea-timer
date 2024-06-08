@@ -241,7 +241,7 @@ new Vue({
         },
     },
     async mounted() {
-        this.timerWorker = new Worker('./timerWorker.js');
+        this.timerWorker = new Worker('./script/timerWorker.js');
         this.timerWorker.onmessage = await this.handleWorkerMessage;
 
         await this.beepWarning.load();
