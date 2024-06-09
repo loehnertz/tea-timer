@@ -9,7 +9,7 @@
           :value="offsetTime"
           class="input"
           type="number"
-          @input="updateOffsetTime($event.target.value)"
+          @input="updateOffsetTime"
         />
       </div>
     </div>
@@ -70,8 +70,9 @@ export default defineComponent({
       const newOffset = (this.incrementTime * percentage) / 100
       this.$emit('updateOffsetTime', newOffset)
     },
-    updateOffsetTime(value: number) {
-      this.$emit('updateOffsetTime', parseFloat(value))
+    updateOffsetTime(event: Event) {
+      const target = event.target as HTMLInputElement
+      this.$emit('updateOffsetTime', parseFloat(target.value))
     },
   },
 })

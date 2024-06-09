@@ -98,20 +98,20 @@ export default defineComponent({
       }
     },
     toggleStartStop() {
-      this.$refs.timerDisplay.toggleStartStop()
+      ;(this.$refs.timerDisplay as InstanceType<typeof TimerDisplay>).toggleStartStop()
     },
     nextInfusion() {
       this.initialTime += this.offsetTime
       this.infusionCount++
       this.offsetTime = 0
       this.persistSettings()
-      this.$refs.timerDisplay.resetTimer()
+      ;(this.$refs.timerDisplay as InstanceType<typeof TimerDisplay>).resetTimer()
     },
     previousInfusion() {
       if (this.infusionCount > 1) {
         this.infusionCount--
         this.persistSettings()
-        this.$refs.timerDisplay.resetTimer()
+        ;(this.$refs.timerDisplay as InstanceType<typeof TimerDisplay>).resetTimer()
       }
     },
     finishInfusion() {
