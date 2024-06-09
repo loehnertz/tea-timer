@@ -1,4 +1,4 @@
-# 🍵 Gong Fu Tea Timer
+# 🍵 Tea Timer
 
 A feature-rich progressive web application (PWA) to help you manage your Gong Fu tea sessions.
 It allows you to track the time for each tea infusion, adjust the timer settings, and keep track of the current infusion
@@ -8,7 +8,7 @@ count.
 > steeping times to extract the best and most nuanced flavors from the tea leaves and to enjoy the tea in multiple
 > infusions which reveal different aspects of the tea's flavor profile over time.
 
-#### Use the app [right in your web browser](https://loehnertz.github.io/gong-fu-tea-timer/).
+#### Use the app [right in your web browser](https://tea-timer.com/).
 
 ## Features
 
@@ -25,7 +25,7 @@ count.
 
 ## Screenshot
 
-![Gong Fu Tea Timer Screenshot](./image/screenshot/cropped.jpeg)
+![Tea Timer Screenshot](./public/image/screenshot/cropped.jpeg)
 
 ## Getting Started
 
@@ -35,12 +35,17 @@ You will need a (somewhat modern) web browser to run this application.
 
 ### Running the App
 
-Open `index.html` in your web browser.
+Run the following commands in the project directory to start the app:
+
+```bash
+npm install
+npm run dev
+```
 
 Optionally, install the app on your device as a PWA by clicking on the "Install" button in the address bar or a similar
 button in the browser's menu.
 
-#### Alternatively, use the app [right in your web browser](https://loehnertz.github.io/gong-fu-tea-timer/), hosted on GitHub Pages.
+#### Alternatively, use the app [right in your web browser](https://tea-timer.com/), hosted on GitHub Pages.
 
 ### Built With
 

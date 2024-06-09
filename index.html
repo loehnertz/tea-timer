@@ -1,161 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Gong Fu Tea Timer</title>
-    <meta content="A feature-rich timer app for Gong Fu tea sessions." name="description">
-    <link href="./image/icon/apple-touch-icon.png" rel="apple-touch-icon" sizes="152x152">
-    <link href="./image/icon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
-    <link href="./image/icon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
-    <link href="site.webmanifest" rel="manifest">
-    <link color="#5bbad5" href="./image/icon/safari-pinned-tab.svg" rel="mask-icon">
-    <link href="./image/icon/favicon.ico" rel="shortcut icon">
-    <meta content="#da532c" name="msapplication-TileColor">
-    <meta content="./image/icon/browserconfig.xml" name="msapplication-config">
-    <meta content="#ffffff" name="theme-color">
-    <link href="https://cdn.jsdelivr.net/npm/bulma@1/css/bulma.min.css" rel="stylesheet">
-    <link href="./style/styles.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Tea Timer</title>
+  <meta content="A feature-rich timer app for Gong Fu tea sessions." name="description">
+  <link href="/site.webmanifest" rel="manifest">
+  <link href="/image/icon/apple-touch-icon.png" rel="apple-touch-icon" sizes="152x152">
+  <link href="/image/icon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+  <link href="/image/icon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+  <link color="#5bbad5" href="/image/icon/safari-pinned-tab.svg" rel="mask-icon">
+  <link href="/image/icon/favicon.ico" rel="shortcut icon">
+  <meta content="#da532c" name="msapplication-TileColor">
+  <meta content="./image/icon/browserconfig.xml" name="msapplication-config">
+  <meta content="#ffffff" name="theme-color">
 </head>
 <body>
-<div class="section is-hidden" id="app">
-    <div class="container">
-        <div class="box" v-if="showSettings">
-            <h1 class="title is-1 has-text-centered">🍵<br>Gong Fu Tea Timer</h1>
-            <div class="field">
-                <label class="label" for="teaType">Select Tea Type:</label>
-                <div class="control">
-                    <div class="select is-fullwidth">
-                        <select id="teaType" v-model="selectedPreset">
-                            <option value="">Custom</option>
-                            <option :value="preset" v-for="preset in presets">{{ preset.name }}</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div v-if="selectedPreset">
-                <div class="field">
-                    <label class="label">
-                        Water Temperature: {{ selectedPreset.waterTemp }} °C
-                    </label>
-                </div>
-                <div class="field">
-                    <label class="label">
-                        Amount: {{ selectedPreset.amount }} g / 100 ml
-                    </label>
-                </div>
-                <div class="field">
-                    <label class="label">
-                        <span class="has-text-weight-bold">
-                            1st Infusion Time: {{ selectedPreset.firstInfusion }} seconds
-                        </span>
-                    </label>
-                </div>
-                <div class="field">
-                    <label class="label">
-                        <span class="has-text-weight-bold">
-                            Additional Infusion Time: {{ selectedPreset.additionalInfusions }} seconds
-                        </span>
-                    </label>
-                </div>
-            </div>
-            <div v-else>
-                <div class="field">
-                    <label class="label" for="initialTime">Initial Infusion Time (seconds):</label>
-                    <div class="control">
-                        <input class="input" id="initialTime" min="1" type="number" v-model.number="initialTime">
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label" for="incrementTime">Time Increment per Infusion (seconds):</label>
-                    <div class="control">
-                        <input class="input" id="incrementTime" min="1" type="number" v-model.number="incrementTime">
-                    </div>
-                </div>
-            </div>
-            <div class="field" id="confirm-button">
-                <div class="control">
-                    <button @click="confirmSettings" class="button is-primary is-fullwidth">Confirm</button>
-                </div>
-            </div>
-            <div class="has-text-centered mt-4">
-                <p>By <a href="http://jakob.codes/" target="_blank">Jakob Löhnertz</a></p>
-            </div>
-        </div>
-
-        <div class="box" id="timer-box" v-else>
-            <h1 class="title is-1 has-text-centered">🍵</h1>
-            <div class="content has-text-centered mt-5">
-                <p class="title is-2">Current Infusion: <span class="has-text-weight-bold">{{ infusionCount }}</span>
-                </p>
-                <p class="title is-1">
-                    <span id="timer" ref="time">{{ timeRemaining.toFixed(2) }}</span>
-                </p>
-                <p class="title is-2">
-                    <progress
-                            :class="timerProgressBarColor"
-                            :value="timerProgressPercent"
-                            class="progress"
-                            max="100">
-                        {{ timerProgressPercent }}%
-                    </progress>
-                </p>
-            </div>
-            <div class="buttons are-medium is-centered mt-4">
-                <button :class="timerRunning ? 'is-danger' : 'is-success'" @click="toggleStartStop"
-                        class="button is-large">{{ timerRunning ? 'Stop' : 'Start' }}
-                </button>
-            </div>
-            <div class="buttons are-medium mt-4">
-                <button @click="previousInfusion" class="button is-info">Previous</button>
-                <button @click="nextInfusion" class="button is-warning">Skip</button>
-            </div>
-            <div class="field mt-5">
-                <label class="label" for="offsetTime">Adjust Current Infusion Time (seconds):</label>
-                <div class="control">
-                    <input :disabled="timerRunning"
-                           class="input"
-                           id="offsetTime"
-                           type="number"
-                           v-model.number="offsetTime">
-                </div>
-            </div>
-            <div class="buttons are-small mt-5" id="offset-buttons">
-                <div id="negative-offsets">
-                    <button
-                            :disabled="timerRunning"
-                            :key="'decrease-' + percentage"
-                            @click="adjustOffsetByPercentage(-percentage)"
-                            class="button is-danger"
-                            v-for="percentage in negativePercentageAdjustments">
-                        -{{ percentage }}%
-                    </button>
-                </div>
-                <div id="positive-offsets">
-                    <button
-                            :disabled="timerRunning"
-                            :key="'increase-' + percentage"
-                            @click="adjustOffsetByPercentage(percentage)"
-                            class="button is-success"
-                            v-for="percentage in positivePercentageAdjustments">
-                        +{{ percentage }}%
-                    </button>
-                </div>
-            </div>
-            <hr>
-            <div class="field mt-5">
-                <button @click="confirmBackToSettings" class="button is-danger is-fullwidth">Back to Settings</button>
-            </div>
-            <div class="has-text-centered mt-4">
-                <p>By <a href="http://jakob.codes/" target="_blank">Jakob Löhnertz</a></p>
-            </div>
-        </div>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-<script src="./script/app.js"></script>
+<div id="app" class="section"></div>
+<script src="./src/main.ts" type="module"></script>
 <script>
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js')
 </script>
 </body>
 </html>

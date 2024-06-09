@@ -1,0 +1,77 @@
+@import 'https://cdn.jsdelivr.net/npm/bulma@1/css/bulma.min.css';
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.box {
+  min-width: 33vw;
+}
+
+.buttons .button {
+  flex: 1;
+}
+
+.buttons.are-small .button {
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  margin: 5px;
+}
+
+.title.is-1 {
+  font-size: 2.5rem;
+}
+
+.title.is-2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+#timer-box {
+  text-align: center;
+}
+
+#offset-buttons > div {
+  display: flex;
+  flex-direction: row;
+}
+
+#timer {
+  font-size: 3.5rem;
+  font-weight: bold;
+}
+
+#confirm-button {
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .buttons {
+    justify-content: center;
+  }
+
+  .buttons .button {
+    flex: 1 1 calc(50% - 20px);
+    margin: 5px 0;
+  }
+
+  .buttons.are-small .button {
+    flex: 1 1 calc(33.33% - 10px);
+    margin: 5px;
+  }
+
+  .title.is-1 {
+    font-size: 2rem;
+  }
+
+  .title.is-2 {
+    font-size: 1.75rem;
+  }
+
+  #timer {
+    font-size: 3rem;
+  }
+}
