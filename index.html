@@ -18,7 +18,7 @@
     <link href="./style/styles.css" rel="stylesheet">
 </head>
 <body>
-<div class="section" id="app">
+<div class="section is-hidden" id="app">
     <div class="container">
         <div class="box" v-if="showSettings">
             <h1 class="title is-1 has-text-centered">🍵<br>Gong Fu Tea Timer</h1>
@@ -91,6 +91,15 @@
                 <p class="title is-1">
                     <span id="timer" ref="time">{{ timeRemaining.toFixed(2) }}</span>
                 </p>
+                <p class="title is-2">
+                    <progress
+                            :class="timerProgressBarColor"
+                            :value="timerProgressPercent"
+                            class="progress"
+                            max="100">
+                        {{ timerProgressPercent }}%
+                    </progress>
+                </p>
             </div>
             <div class="buttons are-medium is-centered mt-4">
                 <button :class="timerRunning ? 'is-danger' : 'is-success'" @click="toggleStartStop"
@@ -146,15 +155,7 @@
 <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 <script src="./script/app.js"></script>
 <script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./service-worker.js')
-            .then(function (registration) {
-                console.log('Service Worker registered with scope:', registration.scope);
-            }).catch(function (error) {
-                console.log('Service Worker registration failed:', error);
-            }
-        );
-    }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
 </script>
 </body>
 </html>

@@ -7,9 +7,13 @@ new Vue({
         offsetTime: 0,
         timeRemaining: 0,
         timerRunning: false,
+        timerProgressPercent: 0,
+        timerProgressBarColor: 'is-primary',
         selectedPreset: '',
         showSettings: true,
         beepWarningPlayed: false,
+        wakeLockActive: false,
+        wakeLock: null,
         timerWorker: null,
         beepEnd: new Audio('./audio/sonar_high.mp3'),
         beepWarning: new Audio('./audio/sonar_low.mp3'),
@@ -24,7 +28,14 @@ new Vue({
             {name: 'Black (small leaf)', waterTemp: 90, amount: 4.5, firstInfusion: 10, additionalInfusions: 5},
             {name: 'Black (large leaf)', waterTemp: 95, amount: 4, firstInfusion: 15, additionalInfusions: 5},
             {name: 'Dark (raw)', waterTemp: 95, amount: 5, firstInfusion: 10, additionalInfusions: 3},
-            {name: 'Dark (ripe)', waterTemp: 99, amount: 5, firstInfusion: 10, additionalInfusions: 5}
+            {name: 'Dark (ripe)', waterTemp: 99, amount: 5, firstInfusion: 10, additionalInfusions: 5},
+        ],
+        chineseTeaProverbs: [
+            "一日无茶苦，长年无茶老。 (A day without tea is bitter; a lifetime without tea is unbearable.)",
+            "茶余酒后事。 (Talks over tea can continue even after the wine is finished.)",
+            "茶不饮不知味。 (You won't know the real taste of tea until you drink it.)",
+            "茶香以静制。 (The fragrance of tea is best appreciated in tranquility.)",
+            "水为茶之母。 (Water is the mother of tea.)",
         ],
     },
     computed: {
@@ -98,6 +109,16 @@ new Vue({
         timeRemaining() {
             this.updateWindowTitle();
         },
+        /**
+         * Watches for changes to the timer running state and requests or releases the wake lock accordingly.
+         */
+        async timerRunning(isRunning) {
+            if (isRunning) {
+                await this.requestWakeLock();
+            } else {
+                await this.releaseWakeLock();
+            }
+        },
     },
     methods: {
         /**
@@ -156,6 +177,27 @@ new Vue({
          */
         adjustOffsetByPercentage(percentage) {
             this.offsetTime = (this.incrementTime * percentage) / 100;
+        },
+        /**
+         * Calculates the elapsed time as a percentage.
+         *
+         * @param {number} currentTime - The current time in a consistent unit of measure.
+         * @param {number} totalTime - The total time in the same unit as currentTime.
+         * @return {number} The percentage of time elapsed.
+         */
+        calculateTimeElapsed(currentTime, totalTime) {
+            if (totalTime === 0) {
+                // Avoid division by zero, and if totalTime is zero, we consider it as 100% completed.
+                console.error('Total time cannot be zero.');
+                return 100;
+            }
+
+            if (currentTime > totalTime) {
+                // If current time exceeds total time, cap the percentage at 100%
+                return 100;
+            }
+
+            return (currentTime / totalTime) * 100;
         },
         /**
          * Confirms the current settings and initializes the session.
@@ -219,6 +261,38 @@ new Vue({
             localStorage.setItem('settings', JSON.stringify(settings));
         },
         /**
+         * Requests a wake lock to prevent the screen from sleeping.
+         */
+        async requestWakeLock() {
+            if (this.wakeLockActive) return;
+            try {
+                this.wakeLock = await navigator.wakeLock.request('screen');
+                this.wakeLock.addEventListener('release', () => {
+                    this.wakeLockActive = false;
+                });
+                this.wakeLockActive = true;
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        },
+        /**
+         * Releases the wake lock if it is active to allow the screen to sleep.
+         */
+        async releaseWakeLock() {
+            if (this.wakeLock !== null) {
+                await this.wakeLock.release();
+                this.wakeLock = null;
+                this.wakeLockActive = false;
+            }
+        },
+        /**
+         * Returns a random Chinese tea proverb.
+         */
+        getRandomTeaProverb() {
+            const index = Math.floor(Math.random() * this.chineseTeaProverbs.length);
+            return this.chineseTeaProverbs[index];
+        },
+        /**
          * Handles keydown events for the timer.
          * @param {KeyboardEvent} event - The keydown event.
          */
@@ -269,6 +343,8 @@ new Vue({
         async handleWorkerMessage(event) {
             const {command, timeRemaining} = event.data;
 
+            this.timerProgressPercent = this.calculateTimeElapsed(this.infusionTime - timeRemaining, this.infusionTime);
+
             switch (command) {
                 case 'tick':
                     this.timerRunning = true;
@@ -277,6 +353,7 @@ new Vue({
 
                     if (this.timeRemaining <= 5 && !this.beepWarningPlayed) {
                         this.beepWarningPlayed = true;
+                        this.timerProgressBarColor = 'is-warning';
                         await this.beepWarning.play();
                     }
 
@@ -290,27 +367,34 @@ new Vue({
                     // This also resets the timer via a web worker event
                     this.nextInfusion();
 
+                    console.log(`Enjoy your tea: ${this.getRandomTeaProverb()}`);
+
                     break;
                 case 'reset':
                     this.timerRunning = false;
 
                     this.timeRemaining = timeRemaining;
 
+                    this.timerProgressBarColor = 'is-primary';
                     this.beepWarningPlayed = false;
 
                     break;
             }
         },
     },
-    mounted() {
+    async mounted() {
         this.timerWorker = new Worker('./script/timerWorker.js');
         this.timerWorker.onmessage = async (e) => await this.handleWorkerMessage(e);
 
         this.loadSession();
 
         window.addEventListener('keydown', (e) => this.handleKeydown(e));
+
+        this.$el.classList.remove('is-hidden');
     },
-    beforeDestroy() {
+    async beforeDestroy() {
         window.removeEventListener('keydown', (e) => this.handleKeydown(e));
+
+        await this.releaseWakeLock();
     },
 });
