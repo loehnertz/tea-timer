@@ -59,6 +59,7 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: ['updateOffsetTime'],
   data() {
     return {
       positivePercentageAdjustments: [10, 25, 50],
@@ -66,10 +67,18 @@ export default defineComponent({
     }
   },
   methods: {
+    /**
+     * Adjusts the offset time by a percentage.
+     * @param percentage - The percentage to adjust the offset time by.
+     */
     adjustOffsetByPercentage(percentage: number) {
       const newOffset = (this.incrementTime * percentage) / 100
       this.$emit('updateOffsetTime', newOffset)
     },
+    /**
+     * Updates the offset time.
+     * @param event - The input event.
+     */
     updateOffsetTime(event: Event) {
       const target = event.target as HTMLInputElement
       this.$emit('updateOffsetTime', parseFloat(target.value))

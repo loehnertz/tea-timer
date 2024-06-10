@@ -28,7 +28,9 @@
       </div>
       <div id="back-button" class="field mt-3">
         <div class="control">
-          <button class="button is-link is-fullwidth" @click="backToHome">Back to Home</button>
+          <button class="button is-link is-fullwidth" @click="$emit('discardSettings')">
+            Back to Home
+          </button>
         </div>
       </div>
     </div>
@@ -36,12 +38,10 @@
 </template>
 
 <script lang="ts">
-import type { PropType } from 'vue'
-import { defineComponent } from 'vue'
+import { defineComponent, type PropType } from 'vue'
 import PresetDetails from '@/components/PresetDetails.vue'
 import CustomSettings from '@/components/CustomSettings.vue'
-import type { Settings, TeaPreset } from '@/assets/types'
-import { BrewMethod } from '@/assets/types'
+import type { TeaPreset } from '@/assets/types'
 
 export default defineComponent({
   name: 'SettingsPanel',
@@ -49,6 +49,7 @@ export default defineComponent({
     PresetDetails,
     CustomSettings,
   },
+  emits: ['confirmSettings', 'discardSettings'],
   props: {
     presets: {
       type: Array as PropType<TeaPreset[]>,
@@ -58,51 +59,39 @@ export default defineComponent({
   data() {
     return {
       selectedPresetName: 'custom' as string,
-      initialTime: 20,
-      incrementTime: 5,
+      initialTime: 20, // Default initial time in seconds
+      incrementTime: 5, // Default increment time in seconds
     }
   },
   computed: {
+    /**
+     * Returns the selected preset object.
+     */
     selectedPreset() {
       return this.presets.find((preset) => preset.name === this.selectedPresetName) || null
     },
   },
   methods: {
+    /**
+     * Emits the `confirmSettings` event to save the selected settings.
+     */
     confirmSettings() {
-      const settings: Settings = {
+      this.$emit('confirmSettings', {
         initialTime: this.initialTime,
         incrementTime: this.incrementTime,
-        infusionCount: 1,
-        method: BrewMethod.GONG_FU,
-      }
-      localStorage.setItem('settings', JSON.stringify(settings))
-      this.$emit('confirmSettings')
-    },
-    backToHome() {
-      this.$emit('discardSettings')
-    },
-    persistSettings() {
-      const settings: Settings = {
-        initialTime: this.initialTime,
-        incrementTime: this.incrementTime,
-        infusionCount: 1,
-        method: BrewMethod.GONG_FU,
-      }
-      localStorage.setItem('settings', JSON.stringify(settings))
+      })
     },
   },
   watch: {
+    /**
+     * Updates the initial time and increment time when a new preset is selected.
+     * @param newPreset - The newly selected preset.
+     */
     selectedPreset(newPreset) {
       if (newPreset) {
         this.initialTime = newPreset.firstInfusion
         this.incrementTime = newPreset.additionalInfusions
       }
-    },
-    initialTime(newValue) {
-      this.persistSettings()
-    },
-    incrementTime(newValue) {
-      this.persistSettings()
     },
   },
 })

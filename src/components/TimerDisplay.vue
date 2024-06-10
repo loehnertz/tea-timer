@@ -43,6 +43,13 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: [
+    'finishInfusion',
+    'nextInfusion',
+    'previousInfusion',
+    'updateTimerRunning',
+    'updateOffsetTime',
+  ],
   data() {
     return {
       timeRemaining: 0,
@@ -58,6 +65,9 @@ export default defineComponent({
     }
   },
   computed: {
+    /**
+     * Calculates the total time for the current infusion.
+     */
     infusionTime() {
       return this.initialTime + this.incrementTime * (this.infusionCount - 1) + this.offsetTime
     },
@@ -79,12 +89,21 @@ export default defineComponent({
     },
   },
   methods: {
+    /**
+     * Updates the time remaining to the total infusion time.
+     */
     updateTimeRemaining() {
       this.timeRemaining = this.infusionTime
     },
+    /**
+     * Updates the window title to display the current time remaining.
+     */
     updateWindowTitle() {
       document.title = `${Math.round(this.timeRemaining)} - Tea Timer`
     },
+    /**
+     * Calculates the percentage of time elapsed based on the current and total time.
+     */
     calculateTimeElapsed(currentTime: number, totalTime: number) {
       if (totalTime === 0) {
         console.error('Total time cannot be zero.')
@@ -95,6 +114,9 @@ export default defineComponent({
       }
       return (currentTime / totalTime) * 100
     },
+    /**
+     * Starts the timer and updates the time remaining every 100ms.
+     */
     startTimer() {
       this.timerRunning = true
       this.$emit('updateTimerRunning', this.timerRunning)
@@ -120,6 +142,9 @@ export default defineComponent({
         this.updateWindowTitle()
       }, 100)
     },
+    /**
+     * Resets the timer to the initial state.
+     */
     resetTimer() {
       this.timerRunning = false
       this.$emit('updateTimerRunning', this.timerRunning)
@@ -130,6 +155,9 @@ export default defineComponent({
       this.beepWarningPlayed = false
       this.updateWindowTitle()
     },
+    /**
+     * Toggles the timer between running and stopped states.
+     */
     toggleStartStop() {
       if (!this.timerRunning) {
         this.startTimer()
@@ -161,6 +189,9 @@ export default defineComponent({
         this.wakeLock = null
       }
     },
+    /**
+     * Handles keydown events to control the timer.
+     */
     handleKeydown(event: KeyboardEvent) {
       switch (event.code) {
         case 'Space':

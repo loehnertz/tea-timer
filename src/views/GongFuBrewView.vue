@@ -3,7 +3,7 @@
     <SettingsPanel
       v-if="showSettings"
       :presets="presets"
-      @confirmSettings="loadSettings"
+      @confirmSettings="confirmSettings"
       @discardSettings="discardSettings"
     />
     <div v-else id="timer-box" class="box">
@@ -75,17 +75,33 @@ export default defineComponent({
       timerRunning: false,
       showSettings: false,
       presets: gongFuPresets as TeaPreset[],
+      chineseTeaProverbs: [
+        '一日无茶苦，长年无茶老。 (A day without tea is bitter; a lifetime without tea is unbearable.)',
+        '茶余酒后事。 (Talks over tea can continue even after the wine is finished.)',
+        "茶不饮不知味。 (You won't know the real taste of tea until you drink it.)",
+        '茶香以静制。 (The fragrance of tea is best appreciated in tranquility.)',
+        '水为茶之母。 (Water is the mother of tea.)',
+      ],
     }
   },
-  mounted() {
-    this.loadSettings()
-  },
   methods: {
+    /**
+     * Confirm the settings and save them to local storage.
+     */
+    confirmSettings(event: { initialTime: number; incrementTime: number }) {
+      this.initialTime = event.initialTime
+      this.incrementTime = event.incrementTime
+      this.persistSettings()
+      this.showSettings = false
+    },
+    /**
+     * Load the settings from local storage.
+     */
     loadSettings() {
       const storedSettings = localStorage.getItem('settings')
       if (storedSettings) {
         const settings: Settings = JSON.parse(storedSettings)
-        if (settings.initialTime !== undefined && settings.incrementTime !== undefined) {
+        if (settings.initialTime != undefined && settings.incrementTime != undefined) {
           this.initialTime = settings.initialTime
           this.incrementTime = settings.incrementTime
           this.infusionCount = settings.infusionCount || 1
@@ -97,15 +113,24 @@ export default defineComponent({
         this.showSettings = true
       }
     },
+    /**
+     * Toggle the start/stop state of the timer.
+     */
     toggleStartStop() {
       ;(this.$refs.timerDisplay as InstanceType<typeof TimerDisplay>).toggleStartStop()
     },
+    /**
+     * Move to the next infusion.
+     */
     nextInfusion() {
       this.infusionCount++
       this.offsetTime = 0
       this.persistSettings()
       ;(this.$refs.timerDisplay as InstanceType<typeof TimerDisplay>).resetTimer()
     },
+    /**
+     * Move to the previous infusion.
+     */
     previousInfusion() {
       if (this.infusionCount > 1) {
         this.infusionCount--
@@ -114,26 +139,41 @@ export default defineComponent({
         ;(this.$refs.timerDisplay as InstanceType<typeof TimerDisplay>).resetTimer()
       }
     },
+    /**
+     * Finish the current infusion and move to the next.
+     */
     finishInfusion() {
       console.log(`Enjoy your tea: ${this.getRandomTeaProverb()}`)
       this.initialTime += this.offsetTime
       this.nextInfusion()
     },
+    /**
+     * Confirm returning to settings.
+     */
     confirmBackToSettings() {
       if (confirm('Are you sure you want to discard the current session and return to settings?')) {
         this.backToSettings()
       }
     },
+    /**
+     * Discard settings and return to the home page.
+     */
     backToSettings() {
       localStorage.removeItem('settings')
       document.title = 'Tea Timer'
       this.offsetTime = 0
       this.showSettings = true
     },
+    /**
+     * Discard settings and return to the home page.
+     */
     discardSettings() {
       localStorage.removeItem('settings')
       this.$router.push('/')
     },
+    /**
+     * Persist the current settings to local storage.
+     */
     persistSettings() {
       const settings: Settings = {
         initialTime: this.initialTime,
@@ -143,27 +183,35 @@ export default defineComponent({
       }
       localStorage.setItem('settings', JSON.stringify(settings))
     },
+    /**
+     * Update the infusion count.
+     */
     updateInfusionCount(newCount: number) {
       this.infusionCount = newCount
       this.persistSettings()
     },
+    /**
+     * Update the offset time.
+     */
     updateOffsetTime(newOffset: number) {
       this.offsetTime = newOffset
     },
+    /**
+     * Update the timer running state.
+     */
     updateTimerRunning(running: boolean) {
       this.timerRunning = running
     },
+    /**
+     * Get a random Chinese tea proverb.
+     */
     getRandomTeaProverb() {
-      const chineseTeaProverbs = [
-        '一日无茶苦，长年无茶老。 (A day without tea is bitter; a lifetime without tea is unbearable.)',
-        '茶余酒后事。 (Talks over tea can continue even after the wine is finished.)',
-        "茶不饮不知味。 (You won't know the real taste of tea until you drink it.)",
-        '茶香以静制。 (The fragrance of tea is best appreciated in tranquility.)',
-        '水为茶之母。 (Water is the mother of tea.)',
-      ]
-      const index = Math.floor(Math.random() * chineseTeaProverbs.length)
-      return chineseTeaProverbs[index]
+      const index = Math.floor(Math.random() * this.chineseTeaProverbs.length)
+      return this.chineseTeaProverbs[index]
     },
+  },
+  mounted() {
+    this.loadSettings()
   },
 })
 </script>

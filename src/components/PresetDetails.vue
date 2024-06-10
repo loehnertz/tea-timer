@@ -24,19 +24,14 @@
 </template>
 
 <script lang="ts">
-import type { PropType } from 'vue'
-import { defineComponent } from 'vue'
+import { defineComponent, type PropType } from 'vue'
+import type { TeaPreset } from '@/assets/types'
 
 export default defineComponent({
   name: 'PresetDetails',
   props: {
     preset: {
-      type: Object as PropType<{
-        waterTemp: number
-        amount: number
-        firstInfusion: number
-        additionalInfusions: number
-      }>,
+      type: Object as PropType<TeaPreset>,
       required: true,
     },
   },
