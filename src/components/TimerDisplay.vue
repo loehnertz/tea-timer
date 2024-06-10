@@ -69,6 +69,7 @@ export default defineComponent({
     incrementTime: 'updateTimeRemaining',
     offsetTime: 'updateTimeRemaining',
     infusionCount: 'updateTimeRemaining',
+    timeRemaining: 'updateWindowTitle',
   },
   methods: {
     /**
@@ -102,18 +103,23 @@ export default defineComponent({
     startTimer() {
       this.timerRunning = true
       this.$emit('updateTimerRunning', this.timerRunning)
+
       this.timeRemaining = this.infusionTime
+
       this.intervalId = setInterval(() => {
         this.timeRemaining -= 0.1
+
         this.timerProgressPercent = this.calculateTimeElapsed(
           this.infusionTime - this.timeRemaining,
           this.infusionTime,
         )
+
         if (this.timeRemaining <= 5 && !this.beepWarningPlayed) {
           this.beepWarningPlayed = true
           this.timerProgressBarColor = 'is-warning'
           this.beepWarning.play()
         }
+
         if (this.timeRemaining <= 0) {
           clearInterval(this.intervalId as number)
           this.timerRunning = false
@@ -121,7 +127,6 @@ export default defineComponent({
           this.beepEnd.play()
           this.$emit('finishInfusion')
         }
-        this.updateWindowTitle()
       }, 100)
     },
     /**
