@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="box">
-      <h1 class="title is-1 has-text-centered">🍵<br />Tea Timer</h1>
+      <h1 class="title is-1 has-text-centered">🍵<br />Settings</h1>
       <div class="field">
         <label class="label" for="teaType">Select Tea Type:</label>
         <div class="control">

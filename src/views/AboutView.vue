@@ -33,21 +33,34 @@
       </ul>
       <h2 class="subtitle is-4">Built With</h2>
       <ul class="content">
-        <li>
-          <a href="https://vuejs.org/" target="_blank">Vue.js</a> - The JavaScript framework used.
-        </li>
-        <li><a href="https://bulma.io/" target="_blank">Bulma CSS</a> - The CSS framework used.</li>
+        <li><a href="https://vuejs.org/" target="_blank">Vue.js</a> - The JS framework used.</li>
+        <li><a href="https://bulma.io/" target="_blank">Bulma</a> - The CSS framework used.</li>
+        <li><a href="https://vitejs.dev/" target="_blank">Vite</a> - The build tool used.</li>
       </ul>
       <h2 class="subtitle is-4">License</h2>
       <p class="content">
         This project is licensed under the MIT License. See the
-        <a href="LICENSE" target="_blank">LICENSE</a> file for details.
+        <a href="https://github.com/loehnertz/tea-timer/blob/master/LICENSE" target="_blank"
+          >LICENSE</a
+        >
+        file for details.
       </p>
       <h2 class="subtitle is-4">Acknowledgments</h2>
       <p class="content">
         <a href="https://meileaf.com/" target="_blank">Mei Leaf</a> for the brewing times and being
         a great source of tea and the knowledge around it.
       </p>
+      <h2 class="subtitle is-4">More Content</h2>
+      <p class="content">
+        Also see
+        <a
+          href="https://loehnertz.notion.site/Tea-1a5d5e05ba1843feab8dd426277e02d9#dad13281c64744a5a5639ff70dafc7c4"
+          target="_blank"
+          >my other projects</a
+        >
+        on tea!
+      </p>
+      <hr />
       <div class="field">
         <div class="control">
           <router-link class="button is-link is-fullwidth" to="/">Back to Home</router-link>

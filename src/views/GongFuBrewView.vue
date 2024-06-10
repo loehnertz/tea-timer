@@ -101,7 +101,6 @@ export default defineComponent({
       ;(this.$refs.timerDisplay as InstanceType<typeof TimerDisplay>).toggleStartStop()
     },
     nextInfusion() {
-      this.initialTime += this.offsetTime
       this.infusionCount++
       this.offsetTime = 0
       this.persistSettings()
@@ -110,13 +109,15 @@ export default defineComponent({
     previousInfusion() {
       if (this.infusionCount > 1) {
         this.infusionCount--
+        this.offsetTime = 0
         this.persistSettings()
         ;(this.$refs.timerDisplay as InstanceType<typeof TimerDisplay>).resetTimer()
       }
     },
     finishInfusion() {
-      this.nextInfusion()
       console.log(`Enjoy your tea: ${this.getRandomTeaProverb()}`)
+      this.initialTime += this.offsetTime
+      this.nextInfusion()
     },
     confirmBackToSettings() {
       if (confirm('Are you sure you want to discard the current session and return to settings?')) {

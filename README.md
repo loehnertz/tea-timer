@@ -1,8 +1,11 @@
 # 🍵 Tea Timer
 
-A feature-rich progressive web application (PWA) to help you manage your Gong Fu tea sessions.
+A feature-rich progressive web application (PWA) to help you manage your tea sessions.
+
 It allows you to track the time for each tea infusion, adjust the timer settings, and keep track of the current infusion
-count.
+count all locally in your browser.
+
+The app supports both Gong Fu Cha and Western-style brewing and comes with predefined tea presets to get you started.
 
 > Gong Fu Cha (功夫茶) is a traditional Chinese tea brewing method that uses a high leaf-to-water ratio and short
 > steeping times to extract the best and most nuanced flavors from the tea leaves and to enjoy the tea in multiple
@@ -15,6 +18,7 @@ count.
 - Responsive design that works well on both desktop and mobile devices.
 - PWA support for installation on devices and subsequent offline use.
 - Dark mode for low-light environments.
+- Supports both Gong Fu Cha and Western-style brewing.
 - Choose from predefined tea presets.
 - Set custom initial infusion time and increment per infusion.
 - Timer for each infusion with a countdown and progress bar.
@@ -27,7 +31,7 @@ count.
 
 ![Tea Timer Screenshot](./public/image/screenshot/cropped.jpeg)
 
-## Getting Started
+## Overview
 
 ### Prerequisites
 
@@ -49,8 +53,9 @@ button in the browser's menu.
 
 ### Built With
 
-- [Vue.js](https://vuejs.org/) - The JavaScript framework used.
-- [Bulma CSS](https://bulma.io/) - The CSS framework used.
+- [Vue.js](https://vuejs.org/) - The JS framework used.
+- [Bulma](https://bulma.io/) - The CSS framework used.
+- [Vite](https://vitejs.dev/) - The build tool used.
 
 ### License
 
@@ -59,3 +64,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ### Acknowledgments
 
 - [Mei Leaf](https://meileaf.com/) for the brewing times and being a great source of tea and the knowledge around it.
+
+## More Content
+
+Also see
+[my other projects](https://loehnertz.notion.site/Tea-1a5d5e05ba1843feab8dd426277e02d9#dad13281c64744a5a5639ff70dafc7c4)
+on tea!

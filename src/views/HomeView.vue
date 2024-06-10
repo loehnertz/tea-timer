@@ -11,6 +11,12 @@
         and a more app-like experience.
       </p>
       <h1 class="title is-2">Select Brewing Style</h1>
+      <div class="buttons are-medium is-centered mt-4">
+        <button class="button is-primary is-large" @click="selectGongFu">Gong Fu Brew</button>
+        <button :disabled="true" class="button is-primary is-large" @click="selectWestern">
+          Western Brew
+        </button>
+      </div>
       <p class="content">
         <strong>Gong Fu Cha (功夫茶)</strong> is a traditional Chinese tea brewing method that uses
         a high leaf-to-water ratio and short steeping times to extract the best and most nuanced
@@ -26,12 +32,7 @@
         leaf-to-water ratio and longer steeping times. This method is more straightforward and
         results in a lot less infusions that extract the tea's flavors at the same time.
       </p>
-      <div class="buttons are-medium is-centered mt-4">
-        <button class="button is-primary is-large" @click="selectGongFu">Gong Fu Brew</button>
-        <button :disabled="true" class="button is-primary is-large" @click="selectWestern">
-          Western Brew
-        </button>
-      </div>
+      <hr />
       <div class="field mt-3">
         <div class="control">
           <router-link class="button is-link is-fullwidth" to="/about">About</router-link>

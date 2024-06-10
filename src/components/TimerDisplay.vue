@@ -51,6 +51,8 @@ export default defineComponent({
       timerProgressBarColor: 'is-primary',
       beepWarningPlayed: false,
       intervalId: null as number | null,
+      wakeLockActive: false,
+      wakeLock: null as WakeLockSentinel | null,
       beepEnd: new Audio('./audio/sonar_high.mp3'),
       beepWarning: new Audio('./audio/sonar_low.mp3'),
     }
@@ -65,6 +67,16 @@ export default defineComponent({
     incrementTime: 'updateTimeRemaining',
     offsetTime: 'updateTimeRemaining',
     infusionCount: 'updateTimeRemaining',
+    /**
+     * Watches for changes to the timer running state and requests or releases the wake lock accordingly.
+     */
+    async timerRunning(isRunning) {
+      if (isRunning) {
+        await this.requestWakeLock()
+      } else {
+        await this.releaseWakeLock()
+      }
+    },
   },
   methods: {
     updateTimeRemaining() {
@@ -125,6 +137,30 @@ export default defineComponent({
         this.resetTimer()
       }
     },
+    /**
+     * Requests a wake lock to prevent the screen from sleeping.
+     */
+    async requestWakeLock() {
+      if (this.wakeLockActive) return
+      try {
+        this.wakeLock = await navigator.wakeLock.request('screen')
+        this.wakeLock.addEventListener('release', () => {
+          this.wakeLockActive = false
+        })
+        this.wakeLockActive = true
+      } catch (e: any) {
+        console.error(`Error requesting wake lock: ${e}`)
+      }
+    },
+    /**
+     * Releases the wake lock if it is active to allow the screen to sleep.
+     */
+    async releaseWakeLock() {
+      if (this.wakeLock !== null) {
+        await this.wakeLock.release()
+        this.wakeLock = null
+      }
+    },
     handleKeydown(event: KeyboardEvent) {
       switch (event.code) {
         case 'Space':
@@ -162,9 +198,10 @@ export default defineComponent({
     this.updateTimeRemaining()
     window.addEventListener('keydown', this.handleKeydown)
   },
-  beforeUnmount() {
-    window.removeEventListener('keydown', this.handleKeydown)
+  async beforeUnmount() {
     clearInterval(this.intervalId as number)
+    await this.releaseWakeLock()
+    window.removeEventListener('keydown', this.handleKeydown)
   },
 })
 </script>
