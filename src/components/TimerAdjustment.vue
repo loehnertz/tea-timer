@@ -9,6 +9,8 @@
           :value="offsetTime"
           class="input"
           type="number"
+          max="100"
+          min="-100"
           @input="updateOffsetTime"
         />
       </div>
@@ -80,9 +82,67 @@ export default defineComponent({
      * @param event - The input event.
      */
     updateOffsetTime(event: Event) {
-      const target = event.target as HTMLInputElement
-      this.$emit('updateOffsetTime', parseFloat(target.value))
+      const target: HTMLInputElement = event.target as HTMLInputElement
+      const offset: number = parseFloat(target.value)
+      if (isNaN(offset) || offset < -100 || offset > 100) return
+      this.$emit('updateOffsetTime', offset)
     },
+    /**
+     * Handles keydown events to control the timer.
+     */
+    handleKeydown(event: KeyboardEvent) {
+      switch (event.code) {
+        case 'ArrowUp':
+          event.preventDefault()
+          if (!this.timerRunning) {
+            this.$emit('updateOffsetTime', this.offsetTime + 1)
+          }
+          break
+        case 'ArrowDown':
+          event.preventDefault()
+          if (!this.timerRunning && this.offsetTime > 0) {
+            this.$emit('updateOffsetTime', this.offsetTime - 1)
+          }
+          break
+      }
+    },
+  },
+  mounted() {
+    document.addEventListener('keydown', this.handleKeydown)
+  },
+  beforeUnmount() {
+    document.removeEventListener('keydown', this.handleKeydown)
   },
 })
 </script>
+
+<style scoped>
+#offset-buttons {
+  justify-content: space-around;
+}
+
+#offset-buttons > div {
+  display: flex;
+  flex-direction: row;
+}
+
+#offset-buttons .button {
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  margin: 5px;
+}
+
+#offset-buttons .button:first-child {
+  margin-left: 0;
+}
+
+#offset-buttons .button:last-child {
+  margin-right: 0;
+}
+
+@media (max-width: 425px) {
+  #offset-buttons.buttons {
+    justify-content: center;
+  }
+}
+</style>

@@ -43,13 +43,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: [
-    'finishInfusion',
-    'nextInfusion',
-    'previousInfusion',
-    'updateTimerRunning',
-    'updateOffsetTime',
-  ],
+  emits: ['finishInfusion', 'updateTimerRunning'],
   data() {
     return {
       timeRemaining: 0,
@@ -58,8 +52,6 @@ export default defineComponent({
       timerProgressBarColor: 'is-primary',
       beepWarningPlayed: false,
       intervalId: null as number | null,
-      wakeLockActive: false,
-      wakeLock: null as WakeLockSentinel | null,
       beepEnd: new Audio('./audio/sonar_high.mp3'),
       beepWarning: new Audio('./audio/sonar_low.mp3'),
     }
@@ -77,16 +69,6 @@ export default defineComponent({
     incrementTime: 'updateTimeRemaining',
     offsetTime: 'updateTimeRemaining',
     infusionCount: 'updateTimeRemaining',
-    /**
-     * Watches for changes to the timer running state and requests or releases the wake lock accordingly.
-     */
-    async timerRunning(isRunning) {
-      if (isRunning) {
-        await this.requestWakeLock()
-      } else {
-        await this.releaseWakeLock()
-      }
-    },
   },
   methods: {
     /**
@@ -146,9 +128,9 @@ export default defineComponent({
      * Resets the timer to the initial state.
      */
     resetTimer() {
+      clearInterval(this.intervalId as number)
       this.timerRunning = false
       this.$emit('updateTimerRunning', this.timerRunning)
-      clearInterval(this.intervalId as number)
       this.timeRemaining = this.infusionTime
       this.timerProgressPercent = 0
       this.timerProgressBarColor = 'is-primary'
@@ -166,30 +148,6 @@ export default defineComponent({
       }
     },
     /**
-     * Requests a wake lock to prevent the screen from sleeping.
-     */
-    async requestWakeLock() {
-      if (this.wakeLockActive) return
-      try {
-        this.wakeLock = await navigator.wakeLock.request('screen')
-        this.wakeLock.addEventListener('release', () => {
-          this.wakeLockActive = false
-        })
-        this.wakeLockActive = true
-      } catch (e: any) {
-        console.error(`Error requesting wake lock: ${e}`)
-      }
-    },
-    /**
-     * Releases the wake lock if it is active to allow the screen to sleep.
-     */
-    async releaseWakeLock() {
-      if (this.wakeLock !== null) {
-        await this.wakeLock.release()
-        this.wakeLock = null
-      }
-    },
-    /**
      * Handles keydown events to control the timer.
      */
     handleKeydown(event: KeyboardEvent) {
@@ -198,30 +156,6 @@ export default defineComponent({
           event.preventDefault()
           this.toggleStartStop()
           break
-        case 'ArrowLeft':
-          event.preventDefault()
-          this.$emit('previousInfusion')
-          break
-        case 'ArrowRight':
-          event.preventDefault()
-          this.$emit('nextInfusion')
-          break
-        case 'ArrowUp':
-          event.preventDefault()
-          if (!this.timerRunning) {
-            this.$emit('updateOffsetTime', this.offsetTime + 1)
-          }
-          break
-        case 'ArrowDown':
-          event.preventDefault()
-          if (!this.timerRunning && this.offsetTime > 0) {
-            this.$emit('updateOffsetTime', this.offsetTime - 1)
-          }
-          break
-        case 'Backspace':
-          event.preventDefault()
-          this.$emit('confirmBackToSettings')
-          break
       }
     },
   },
@@ -229,10 +163,22 @@ export default defineComponent({
     this.updateTimeRemaining()
     window.addEventListener('keydown', this.handleKeydown)
   },
-  async beforeUnmount() {
+  beforeUnmount() {
     clearInterval(this.intervalId as number)
-    await this.releaseWakeLock()
     window.removeEventListener('keydown', this.handleKeydown)
   },
 })
 </script>
+
+<style scoped>
+#timer {
+  font-size: 3.5rem;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  #timer {
+    font-size: 3rem;
+  }
+}
+</style>

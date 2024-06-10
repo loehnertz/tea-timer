@@ -1,23 +1,19 @@
 <template>
   <div>
     <div class="field">
-      <label class="label">Water Temperature: {{ preset.waterTemp }} °C</label>
+      <label class="label is-size-6"> Water Temperature: {{ preset.waterTemp }} °C </label>
     </div>
     <div class="field">
-      <label class="label">Amount: {{ preset.amount }} g / 100 ml</label>
+      <label class="label is-size-6"> Amount: {{ preset.amount }} g / 100 ml </label>
     </div>
     <div class="field">
-      <label class="label">
-        <span class="has-text-weight-bold"
-          >1st Infusion Time: {{ preset.firstInfusion }} seconds</span
-        >
+      <label class="label is-size-6 has-text-weight-bold">
+        1st Infusion Time: {{ preset.firstInfusion }} seconds
       </label>
     </div>
     <div class="field">
-      <label class="label">
-        <span class="has-text-weight-bold"
-          >Additional Infusion Time: {{ preset.additionalInfusions }} seconds</span
-        >
+      <label class="label is-size-6 has-text-weight-bold">
+        Additional Infusion Time: {{ preset.additionalInfusions }} seconds
       </label>
     </div>
   </div>
