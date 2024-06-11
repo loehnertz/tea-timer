@@ -23,6 +23,9 @@
           Adjust the timer just for the next infusion if the last one was too strong or too weak.
         </li>
         <li>
+          Control the timer with the space bar and the arrow keys for a more hands-free experience.
+        </li>
+        <li>
           Keeps the device awake during an infusion to prevent the timer from disappearing while the
           tea is brewing.
         </li>

@@ -24,6 +24,7 @@ The app supports both Gong Fu Cha and Western-style brewing and comes with prede
 - Timer for each infusion with a countdown and progress bar.
 - Audio alerts for the end of the infusion and five seconds before the end to get ready to pour.
 - Adjust the timer just for the next infusion if the last one was too strong or too weak.
+- Control the timer with the space bar and the arrow keys for a more hands-free experience.
 - Keeps the device awake during an infusion to prevent the timer from disappearing while the tea is brewing.
 - Stores and loads settings and infusion count using local storage in case the app is closed during a session.
 
