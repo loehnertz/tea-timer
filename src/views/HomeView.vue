@@ -50,7 +50,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import FooterAttribution from '@/components/FooterAttribution.vue'
-import { BrewMethod } from '@/assets/types'
 
 export default defineComponent({
   name: 'HomeView',
@@ -58,30 +57,11 @@ export default defineComponent({
     FooterAttribution,
   },
   methods: {
-    /**
-     * Persist the selected brewing method to the local storage and navigate to the selected
-     * brewing view.
-     */
     selectGongFu() {
-      this.persistMethod(BrewMethod.GONG_FU)
       this.$router.push('/gong-fu-brew')
     },
-    /**
-     * Persist the selected brewing method to the local storage and navigate to the selected
-     * brewing view.
-     */
     selectWestern() {
-      this.persistMethod(BrewMethod.WESTERN)
       this.$router.push('/western-brew')
-    },
-    /**
-     * Persist the selected brewing method to the local storage.
-     */
-    persistMethod(method: BrewMethod) {
-      const settings = JSON.parse(localStorage.getItem('settings') || '{}')
-      settings.method = method
-      settings.savedAt = Date.now()
-      localStorage.setItem('settings', JSON.stringify(settings))
     },
   },
 })
