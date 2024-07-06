@@ -11,6 +11,7 @@ export interface Settings {
   incrementTime: number
   infusionCount: number
   method: BrewMethod
+  savedAt: number
 }
 
 export enum BrewMethod {

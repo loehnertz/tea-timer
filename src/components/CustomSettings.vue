@@ -46,15 +46,15 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['update:initialTime', 'update:incrementTime'],
+  emits: ['updateInitialTime', 'updateInitialTime'],
   methods: {
     updateInitialTime(event: Event) {
       const target = event.target as HTMLInputElement
-      this.$emit('update:initialTime', parseInt(target.value, 10))
+      this.$emit('updateInitialTime', parseInt(target.value, 10))
     },
     updateIncrementTime(event: Event) {
       const target = event.target as HTMLInputElement
-      this.$emit('update:incrementTime', parseInt(target.value, 10))
+      this.$emit('updateInitialTime', parseInt(target.value, 10))
     },
   },
 })

@@ -80,6 +80,7 @@ export default defineComponent({
     persistMethod(method: BrewMethod) {
       const settings = JSON.parse(localStorage.getItem('settings') || '{}')
       settings.method = method
+      settings.savedAt = Date.now()
       localStorage.setItem('settings', JSON.stringify(settings))
     },
   },

@@ -83,16 +83,33 @@ export default defineComponent({
      * Load the settings from local storage.
      */
     loadSettings() {
+      function isOlderThan12hours(savedAt: number) {
+        if (!savedAt) return true
+        return Date.now() - savedAt > 12 * 60 * 60 * 1000
+      }
+
       const storedSettings = localStorage.getItem('settings')
+
       if (storedSettings) {
         const settings: Settings = JSON.parse(storedSettings)
-        if (settings.initialTime != undefined && settings.incrementTime != undefined) {
+
+        // Clear settings if:
+        // - the settings were saved more than 12 hours ago
+        // - the method has changed
+        // - the initial time or increment time is missing
+        if (
+          isOlderThan12hours(settings.savedAt) ||
+          settings.method != this.method ||
+          !settings.initialTime ||
+          !settings.incrementTime
+        ) {
+          localStorage.removeItem('settings')
+          this.showSettings = true
+        } else {
           this.initialTime = settings.initialTime
           this.incrementTime = settings.incrementTime
           this.infusionCount = settings.infusionCount || 1
           this.showSettings = false
-        } else {
-          this.showSettings = true
         }
       } else {
         this.showSettings = true
@@ -133,6 +150,7 @@ export default defineComponent({
         incrementTime: this.incrementTime,
         infusionCount: this.infusionCount,
         method: this.method,
+        savedAt: Date.now(),
       }
       localStorage.setItem('settings', JSON.stringify(settings))
     },

@@ -19,8 +19,8 @@
       v-else
       v-model:incrementTime="incrementTime"
       v-model:initialTime="initialTime"
-      @update:incrementTime="incrementTime = $event"
-      @update:initialTime="initialTime = $event"
+      @updateIncrementTime="incrementTime = $event"
+      @updateInitialTime="initialTime = $event"
     />
     <hr />
     <div class="field">

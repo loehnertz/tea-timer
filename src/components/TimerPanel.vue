@@ -78,10 +78,15 @@ export default defineComponent({
      * Watches for changes to the timer running state and requests or releases the wake lock accordingly.
      */
     async timerRunning(isRunning) {
-      if (isRunning) {
+      this.wakeLockActive = isRunning
+    },
+    async wakeLockActive(isActive) {
+      if (isActive) {
         await this.requestWakeLock()
+        console.log('Requested screen wake lock')
       } else {
         await this.releaseWakeLock()
+        console.log('Screen wake lock released')
       }
     },
   },
@@ -122,12 +127,10 @@ export default defineComponent({
      * Requests a wake lock to prevent the screen from sleeping.
      */
     async requestWakeLock() {
-      if (this.wakeLockActive) return
       try {
+        if (this.wakeLock) return
         this.wakeLock = await navigator.wakeLock.request('screen')
-        this.wakeLock.addEventListener('release', () => {
-          this.wakeLockActive = false
-        })
+        this.wakeLock.addEventListener('release', () => (this.wakeLockActive = false))
         this.wakeLockActive = true
       } catch (e: any) {
         console.error(`Error requesting wake lock: ${e}`)
@@ -162,7 +165,7 @@ export default defineComponent({
     document.addEventListener('keydown', this.handleKeydown)
   },
   async beforeUnmount() {
-    await this.releaseWakeLock()
+    this.wakeLockActive = false
     document.removeEventListener('keydown', this.handleKeydown)
   },
 })
