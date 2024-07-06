@@ -101,13 +101,27 @@ export default defineComponent({
      * Starts the timer and updates the time remaining every 100ms.
      */
     startTimer() {
+      /**
+       * Calculates the remaining time based on the start moment and total time.
+       *
+       * @param startMoment The moment when the timer started as an epoch timestamp.
+       * @param totalTime The total time in seconds.
+       */
+      function getRemainingTime(startMoment: number, totalTime: number): number {
+        const currentMoment = Date.now()
+        const elapsedTimeInSeconds = (currentMoment - startMoment) / 1000
+        const remainingTimeInSeconds = totalTime - elapsedTimeInSeconds
+        return Math.max(0, remainingTimeInSeconds)
+      }
+
       this.timerRunning = true
       this.$emit('updateTimerRunning', this.timerRunning)
 
       this.timeRemaining = this.infusionTime
+      const startMoment = Date.now()
 
       this.intervalId = setInterval(() => {
-        this.timeRemaining -= 0.1
+        this.timeRemaining = getRemainingTime(startMoment, this.infusionTime)
 
         this.timerProgressPercent = this.calculateTimeElapsed(
           this.infusionTime - this.timeRemaining,
