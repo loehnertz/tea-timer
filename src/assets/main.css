@@ -1,17 +1,5 @@
 @import 'https://cdn.jsdelivr.net/npm/bulma@1/css/bulma.min.css';
 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-.box {
-  min-width: 350px;
-  max-width: 750px;
-}
-
 .buttons .button {
   flex: 1;
 }

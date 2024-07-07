@@ -8,9 +8,9 @@
           :disabled="timerRunning"
           :value="offsetTime"
           class="input"
-          type="number"
           max="100"
           min="-100"
+          type="number"
           @input="updateOffsetTime"
         />
       </div>

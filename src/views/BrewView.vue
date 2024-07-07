@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="box">
+  <div class="container columns is-centered">
+    <div class="box has-text-centered">
       <SettingsPanel
         v-if="showSettings"
         :customDefaults="customDefaults"
@@ -189,9 +189,3 @@ export default defineComponent({
   },
 })
 </script>
-
-<style scoped>
-.box {
-  text-align: center;
-}
-</style>

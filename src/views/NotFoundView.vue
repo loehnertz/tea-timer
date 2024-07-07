@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container columns is-centered">
     <div class="box">
       <h1 class="title is-1 has-text-centered">Page Not Found</h1>
       <p class="content">

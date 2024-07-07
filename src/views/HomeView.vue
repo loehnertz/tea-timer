@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container columns is-centered">
     <div class="box has-text-centered">
       <h1 class="title is-1">🍵 Tea Timer</h1>
       <p class="content">

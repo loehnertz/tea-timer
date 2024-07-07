@@ -21,10 +21,10 @@
         <input
           id="incrementTime"
           :value="incrementTime"
-          @change="updateIncrementTime"
           class="input"
           min="1"
           type="number"
+          @change="updateIncrementTime"
         />
       </div>
     </div>
