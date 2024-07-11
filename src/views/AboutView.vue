@@ -12,6 +12,8 @@
         <li>Responsive design that works well on both desktop and mobile devices.</li>
         <li>PWA support for installation on devices and subsequent offline use.</li>
         <li>Dark mode for low-light environments.</li>
+        <li>Supports both Gong Fu Cha and Western-style brewing.</li>
+        <li>Remembers when the session was started and how many infusions have been brewed.</li>
         <li>Choose from predefined tea presets.</li>
         <li>Set custom initial infusion time and increment per infusion.</li>
         <li>Timer for each infusion with a countdown and progress bar.</li>

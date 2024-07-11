@@ -50,6 +50,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import FooterAttribution from '@/components/FooterAttribution.vue'
+import { BrewMethod, type SessionSettings } from '@/assets/types'
+import { isOlderThan12hours } from '@/shared'
 
 export default defineComponent({
   name: 'HomeView',
@@ -63,6 +65,34 @@ export default defineComponent({
     selectWestern() {
       this.$router.push('/western-brew')
     },
+    loadSettings() {
+      const storedSettings = localStorage.getItem('settings')
+
+      if (storedSettings) {
+        const settings: SessionSettings = JSON.parse(storedSettings)
+
+        if (isOlderThan12hours(settings.savedAt)) {
+          console.log('Settings are outdated; discarding them')
+          localStorage.removeItem('settings')
+          return
+        }
+
+        switch (settings.method) {
+          case BrewMethod.GONG_FU:
+            this.selectGongFu()
+            break
+          case BrewMethod.WESTERN:
+            this.selectWestern()
+            break
+          default:
+            console.warn('Unknown brewing method:', settings.method)
+            break
+        }
+      }
+    },
+  },
+  mounted() {
+    this.loadSettings()
   },
 })
 </script>

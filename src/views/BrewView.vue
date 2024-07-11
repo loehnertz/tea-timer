@@ -13,6 +13,7 @@
         :incrementTime="incrementTime"
         :infusionCount="infusionCount"
         :initialTime="initialTime"
+        :startedAt="new Date(startedAt)"
         @backToSettings="backToSettings"
         @changedInfusionCount="updateInfusionCount"
         @finishInfusion="finishInfusion"
@@ -27,8 +28,9 @@ import TimerPanel from '@/components/TimerPanel.vue'
 import SettingsPanel from '@/components/SettingsPanel.vue'
 import BackToSettings from '@/components/BackToSettings.vue'
 import FooterAttribution from '@/components/FooterAttribution.vue'
-import type { Settings, TeaPreset } from '@/assets/types'
+import type { SessionSettings, TeaPreset } from '@/assets/types'
 import { BrewMethod } from '@/assets/types'
+import { isOlderThan12hours } from '@/shared'
 
 export default defineComponent({
   name: 'BrewView',
@@ -57,6 +59,7 @@ export default defineComponent({
       initialTime: this.customDefaults.initialTime,
       incrementTime: this.customDefaults.incrementTime,
       infusionCount: 1,
+      startedAt: Date.now(),
       timerRunning: false,
       showSettings: false,
       chineseTeaProverbs: [
@@ -68,6 +71,17 @@ export default defineComponent({
       ],
     }
   },
+  watch: {
+    /**
+     * Watches for changes to the infusion count and sets the start time once the first infusion is complete.
+     */
+    infusionCount(newCount) {
+      if (newCount === 2) {
+        const initialTimeMillis = this.initialTime * 1000
+        this.startedAt = Date.now() - initialTimeMillis
+      }
+    },
+  },
   methods: {
     /**
      * Confirm the settings and save them to local storage.
@@ -76,22 +90,20 @@ export default defineComponent({
       this.initialTime = event.initialTime
       this.incrementTime = event.incrementTime
       this.infusionCount = 1
+      this.startedAt = Date.now()
+
       this.persistSettings()
+
       this.showSettings = false
     },
     /**
      * Load the settings from local storage.
      */
     loadSettings() {
-      function isOlderThan12hours(savedAt: number) {
-        if (!savedAt) return true
-        return Date.now() - savedAt > 12 * 60 * 60 * 1000
-      }
-
       const storedSettings = localStorage.getItem('settings')
 
       if (storedSettings) {
-        const settings: Settings = JSON.parse(storedSettings)
+        const settings: SessionSettings = JSON.parse(storedSettings)
 
         // Clear settings if:
         // - the settings were saved more than 12 hours ago
@@ -103,12 +115,14 @@ export default defineComponent({
           !settings.initialTime ||
           !settings.incrementTime
         ) {
+          console.log('Settings are outdated or malformed; discarding them')
           localStorage.removeItem('settings')
           this.showSettings = true
         } else {
           this.initialTime = settings.initialTime
           this.incrementTime = settings.incrementTime
           this.infusionCount = settings.infusionCount || 1
+          this.startedAt = settings.startedAt || Date.now()
           this.showSettings = false
         }
       } else {
@@ -120,8 +134,10 @@ export default defineComponent({
      */
     finishInfusion(event: { infusionCount: number; offsetTime: number }) {
       console.log(`Enjoy your tea: ${this.getRandomTeaProverb()}`)
+
       this.initialTime += event.offsetTime
       this.infusionCount = event.infusionCount
+
       this.persistSettings()
     },
     /**
@@ -145,11 +161,12 @@ export default defineComponent({
      * Persist the current settings to local storage.
      */
     persistSettings() {
-      const settings: Settings = {
+      const settings: SessionSettings = {
         initialTime: this.initialTime,
         incrementTime: this.incrementTime,
         infusionCount: this.infusionCount,
         method: this.method,
+        startedAt: this.startedAt,
         savedAt: Date.now(),
       }
       localStorage.setItem('settings', JSON.stringify(settings))
@@ -159,6 +176,7 @@ export default defineComponent({
      */
     updateInfusionCount(infusionCount: number) {
       this.infusionCount = infusionCount
+
       this.persistSettings()
     },
     /**

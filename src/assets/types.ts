@@ -6,11 +6,12 @@ export interface TeaPreset {
   additionalInfusions: number
 }
 
-export interface Settings {
+export interface SessionSettings {
   initialTime: number
   incrementTime: number
   infusionCount: number
   method: BrewMethod
+  startedAt: number
   savedAt: number
 }
 

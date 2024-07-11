@@ -14,9 +14,9 @@
       </div>
     </div>
     <div class="field">
-      <label class="label is-size-6" for="incrementTime"
-        >Time Increment per Infusion (seconds):</label
-      >
+      <label class="label is-size-6" for="incrementTime">
+        Time Increment per Infusion (seconds):
+      </label>
       <div class="control">
         <input
           id="incrementTime"
@@ -46,7 +46,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ['updateInitialTime', 'updateInitialTime'],
+  emits: ['updateInitialTime', 'updateIncrementTime'],
   methods: {
     updateInitialTime(event: Event) {
       const target = event.target as HTMLInputElement
@@ -54,7 +54,7 @@ export default defineComponent({
     },
     updateIncrementTime(event: Event) {
       const target = event.target as HTMLInputElement
-      this.$emit('updateInitialTime', parseInt(target.value, 10))
+      this.$emit('updateIncrementTime', parseInt(target.value, 10))
     },
   },
 })

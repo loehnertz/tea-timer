@@ -19,6 +19,7 @@ The app supports both Gong Fu Cha and Western-style brewing and comes with prede
 - PWA support for installation on devices and subsequent offline use.
 - Dark mode for low-light environments.
 - Supports both Gong Fu Cha and Western-style brewing.
+- Remembers when the session was started and how many infusions have been brewed.
 - Choose from predefined tea presets.
 - Set custom initial infusion time and increment per infusion.
 - Timer for each infusion with a countdown and progress bar.

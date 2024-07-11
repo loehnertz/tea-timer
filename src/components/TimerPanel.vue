@@ -7,6 +7,7 @@
       :infusionCount="infusionCount"
       :initialTime="initialTime"
       :offsetTime="offsetTime"
+      :startedAt="startedAt"
       @finishInfusion="finishInfusion"
       @updateTimerRunning="timerRunning = $event"
     />
@@ -61,6 +62,10 @@ export default defineComponent({
     },
     infusionCount: {
       type: Number,
+      required: true,
+    },
+    startedAt: {
+      type: Date,
       required: true,
     },
   },

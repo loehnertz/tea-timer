@@ -17,8 +17,8 @@
     <PresetDetails v-if="selectedPreset" :preset="selectedPreset" />
     <CustomSettings
       v-else
-      v-model:incrementTime="incrementTime"
-      v-model:initialTime="initialTime"
+      :incrementTime="incrementTime"
+      :initialTime="initialTime"
       @updateIncrementTime="incrementTime = $event"
       @updateInitialTime="initialTime = $event"
     />

@@ -1,7 +1,12 @@
 <template>
   <div class="content has-text-centered mt-5">
-    <p class="title is-2">
-      Current Infusion: <span class="has-text-weight-bold">{{ infusionCount }}</span>
+    <p id="infusion-counter" class="title is-2">
+      <span class="has-text-weight-bold">Current Infusion:</span>
+      {{ infusionCount }}
+    </p>
+    <p id="start-time" class="title is-6">
+      <span class="has-text-weight-bold">Started at:</span>
+      {{ startedAt.toLocaleTimeString(undefined, dateFormatOptions) }}
     </p>
     <p class="title is-1">
       <span id="timer">{{ timeRemaining.toFixed(2) }}</span>
@@ -42,6 +47,10 @@ export default defineComponent({
       type: Number,
       required: true,
     },
+    startedAt: {
+      type: Date,
+      required: true,
+    },
   },
   emits: ['finishInfusion', 'updateTimerRunning'],
   data() {
@@ -54,6 +63,7 @@ export default defineComponent({
       intervalId: null as number | null,
       beepEnd: new Audio('./audio/sonar_high.mp3'),
       beepWarning: new Audio('./audio/sonar_low.mp3'),
+      dateFormatOptions: { hour: '2-digit', minute: '2-digit', hour12: false } as const,
     }
   },
   computed: {
@@ -190,6 +200,14 @@ export default defineComponent({
 </script>
 
 <style scoped>
+#infusion-counter {
+  margin-bottom: 0.5em;
+}
+
+#start-time {
+  margin-bottom: 2em;
+}
+
 #timer {
   font-size: 3.5rem;
   font-weight: bold;

@@ -64,8 +64,8 @@ export default defineComponent({
   emits: ['updateOffsetTime'],
   data() {
     return {
-      positivePercentageAdjustments: [10, 25, 50],
-      negativePercentageAdjustments: [10, 25, 50].reverse(),
+      positivePercentageAdjustments: [25, 50, 75],
+      negativePercentageAdjustments: [25, 50, 75].reverse(),
     }
   },
   methods: {
