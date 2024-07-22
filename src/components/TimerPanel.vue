@@ -11,6 +11,9 @@
       @finishInfusion="finishInfusion"
       @updateTimerRunning="timerRunning = $event"
     />
+    <div>
+      <p class="help">Ensure that your sound is turned on!</p>
+    </div>
     <div class="buttons are-medium is-centered mt-4">
       <button
         :class="timerRunning ? 'is-danger' : 'is-success'"

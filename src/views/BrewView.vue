@@ -31,6 +31,7 @@ import FooterAttribution from '@/components/FooterAttribution.vue'
 import type { SessionSettings, TeaPreset } from '@/assets/types'
 import { BrewMethod } from '@/assets/types'
 import { isOlderThan12hours } from '@/shared'
+import MobileDetect from 'mobile-detect'
 
 export default defineComponent({
   name: 'BrewView',
@@ -187,6 +188,27 @@ export default defineComponent({
       return this.chineseTeaProverbs[index]
     },
     /**
+     * Warn the user (once) to not lock the screen on mobile devices as it may make
+     * the timer inconsistent.
+     */
+    alertForTimerInconsistency() {
+      if (this.isMobileDevice()) {
+        if (!localStorage.getItem('alertedForTimerInconsistency')) {
+          alert(
+            'Locking the screen may make the timer inconsistent or cause it stop working entirely. The application will keep the screen on automatically while the timer is running.',
+          )
+          localStorage.setItem('alertedForTimerInconsistency', 'true')
+        }
+      }
+    },
+    /**
+     * Returns `true` if the user is on a mobile device.
+     */
+    isMobileDevice(): boolean {
+      const md = new MobileDetect(window.navigator.userAgent)
+      return !!md.mobile()
+    },
+    /**
      * Handles keydown events to control the timer.
      */
     handleKeydown(event: KeyboardEvent) {
@@ -200,6 +222,7 @@ export default defineComponent({
   },
   mounted() {
     this.loadSettings()
+    this.alertForTimerInconsistency()
     window.addEventListener('keydown', this.handleKeydown)
   },
   beforeUnmount() {
