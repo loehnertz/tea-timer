@@ -145,7 +145,7 @@ export default defineComponent({
      * Discard settings and return to the home page if the user confirms.
      */
     backToSettings() {
-      if (confirm('Are you sure you want to go back to settings and discard the session?')) {
+      if (confirm('Are you sure you want to go back to the settings and discard the session?')) {
         localStorage.removeItem('settings')
         document.title = 'Tea Timer'
         this.showSettings = true
@@ -195,7 +195,8 @@ export default defineComponent({
       if (this.isMobileDevice()) {
         if (!localStorage.getItem('alertedForTimerInconsistency')) {
           alert(
-            'Locking the screen may make the timer inconsistent or cause it stop working entirely. The application will keep the screen on automatically while the timer is running.',
+            'Locking the screen may make the timer inconsistent or cause it to stop working entirely.' +
+              'The application will keep the screen on automatically while the timer is running.',
           )
           localStorage.setItem('alertedForTimerInconsistency', 'true')
         }
