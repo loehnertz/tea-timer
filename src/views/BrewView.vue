@@ -78,8 +78,11 @@ export default defineComponent({
      */
     infusionCount(newCount) {
       if (newCount === 2) {
+        // If started somewhat recently, the initial time should be the same as the first infusion
         const initialTimeMillis = this.initialTime * 1000
-        this.startedAt = Date.now() - initialTimeMillis
+        if (Date.now() - this.startedAt < initialTimeMillis * 2) {
+          this.startedAt = Date.now() - initialTimeMillis
+        }
       }
     },
   },
