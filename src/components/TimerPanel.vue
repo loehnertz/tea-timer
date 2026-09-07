@@ -132,13 +132,29 @@ export default defineComponent({
       ;(this.$refs.timerDisplay as InstanceType<typeof TimerDisplay>).resetTimer()
     },
     /**
+     * Re-requests the wake lock when the tab becomes visible again. The browser automatically
+     * releases the wake lock whenever the document is hidden, so without this it would never be
+     * reacquired once the user switches back while the timer is still running.
+     */
+    async handleVisibilityChange() {
+      if (document.visibilityState === 'visible' && this.timerRunning) {
+        await this.requestWakeLock()
+      }
+    },
+    /**
      * Requests a wake lock to prevent the screen from sleeping.
      */
     async requestWakeLock() {
       try {
         if (this.wakeLock) return
         this.wakeLock = await navigator.wakeLock.request('screen')
-        this.wakeLock.addEventListener('release', () => (this.wakeLockActive = false))
+        this.wakeLock.addEventListener('release', () => {
+          // The browser releases the lock on its own whenever the tab is hidden, so this must
+          // clear the reference too, otherwise the truthy but stale sentinel would make the next
+          // requestWakeLock() call (e.g. from handleVisibilityChange) bail out early.
+          this.wakeLock = null
+          this.wakeLockActive = false
+        })
         this.wakeLockActive = true
       } catch (e: any) {
         console.error(`Error requesting wake lock: ${e}`)
@@ -171,10 +187,12 @@ export default defineComponent({
   },
   mounted() {
     document.addEventListener('keydown', this.handleKeydown)
+    document.addEventListener('visibilitychange', this.handleVisibilityChange)
   },
   async beforeUnmount() {
     this.wakeLockActive = false
     document.removeEventListener('keydown', this.handleKeydown)
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
   },
 })
 </script>
