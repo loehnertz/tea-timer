@@ -108,6 +108,92 @@ export default defineComponent({
       return (currentTime / totalTime) * 100
     },
     /**
+     * Silently plays and immediately pauses the beep sounds. This must happen synchronously
+     * within a user gesture (e.g. the Start click) to satisfy browser autoplay policies, so that
+     * the later programmatic play() calls from within the timer interval still work once the tab
+     * has been backgrounded or minimized.
+     */
+    primeAudioPlayback() {
+      for (const audio of [this.beepWarning, this.beepEnd]) {
+        const wasMuted = audio.muted
+        audio.muted = true
+        audio
+          .play()
+          .then(() => {
+            audio.pause()
+            audio.currentTime = 0
+            audio.muted = wasMuted
+          })
+          .catch(() => {
+            audio.muted = wasMuted
+          })
+      }
+    },
+    /**
+     * Requests permission to show notifications, used as a fallback for when the browser blocks
+     * or suspends audio playback in a backgrounded tab. Tied to the Start click since that's a
+     * user gesture, which some browsers require for the permission prompt to appear.
+     */
+    requestNotificationPermission() {
+      if (typeof Notification === 'undefined') return
+      if (Notification.permission !== 'default') return
+      try {
+        Notification.requestPermission().catch((e) => {
+          console.error(`Error requesting notification permission: ${e}`)
+        })
+      } catch (e) {
+        // Some browsers (e.g. under a restrictive Permissions-Policy) throw synchronously here
+        // instead of rejecting the promise.
+        console.error(`Error requesting notification permission: ${e}`)
+      }
+    },
+    /**
+     * Plays a beep sound, logging (rather than silently swallowing) any failure to do so, e.g.
+     * because the browser blocked playback in a backgrounded tab.
+     */
+    playSound(audio: HTMLAudioElement) {
+      audio.currentTime = 0
+      audio.play().catch((e) => {
+        console.error(`Error playing sound: ${e}`)
+      })
+    },
+    /**
+     * Shows a system notification as a fallback for when the tab is hidden, in case audio
+     * playback was blocked or suspended by the browser while backgrounded.
+     */
+    async notifyIfHidden(body: string) {
+      if (typeof Notification === 'undefined') return
+      if (document.visibilityState !== 'hidden' || Notification.permission !== 'granted') return
+
+      const title = 'Tea Timer'
+      // A shared tag replaces any still-open notification from a previous infusion instead of
+      // piling up (relevant for gongfu brews with many short infusions); renotify makes sure the
+      // replacement still alerts the user instead of silently swapping in.
+      const options = {
+        body,
+        icon: './image/icon/android-chrome-144x144.png',
+        tag: 'tea-timer-infusion',
+        renotify: true,
+      }
+
+      try {
+        // Chrome on Android disallows the plain `new Notification()` constructor from a page
+        // (it throws "Illegal constructor") and requires going through the service worker
+        // registration instead. getRegistration() (unlike `.ready`) resolves immediately with
+        // undefined rather than hanging forever if no service worker is registered yet, e.g. in
+        // local dev where the PWA plugin doesn't register one.
+        const registration =
+          'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : undefined
+        if (registration) {
+          await registration.showNotification(title, options)
+        } else {
+          new Notification(title, options)
+        }
+      } catch (e) {
+        console.error(`Error showing notification: ${e}`)
+      }
+    },
+    /**
      * Starts the timer and updates the time remaining every 100ms.
      */
     startTimer() {
@@ -123,6 +209,9 @@ export default defineComponent({
         const remainingTimeInSeconds = totalTime - elapsedTimeInSeconds
         return Math.max(0, remainingTimeInSeconds)
       }
+
+      this.primeAudioPlayback()
+      this.requestNotificationPermission()
 
       this.timerRunning = true
       this.$emit('updateTimerRunning', this.timerRunning)
@@ -141,14 +230,16 @@ export default defineComponent({
         if (this.timeRemaining <= 5 && !this.beepWarningPlayed) {
           this.beepWarningPlayed = true
           this.timerProgressBarColor = 'is-warning'
-          this.beepWarning.play()
+          this.playSound(this.beepWarning)
+          this.notifyIfHidden('Almost done, get ready!')
         }
 
         if (this.timeRemaining <= 0) {
           clearInterval(this.intervalId as number)
           this.timerRunning = false
           this.$emit('updateTimerRunning', this.timerRunning)
-          this.beepEnd.play()
+          this.playSound(this.beepEnd)
+          this.notifyIfHidden('Infusion finished!')
           this.$emit('finishInfusion')
         }
       }, 100)
